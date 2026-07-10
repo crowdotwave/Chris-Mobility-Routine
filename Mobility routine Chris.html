@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ANCHOR // Capsule Opener</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0a0b10;
+    --surface:#14161f;
+    --elevated:#1b1e2a;
+    --elevated-hi:#232739;
+    --border:#282c3c;
+    --border-hi:#3a4058;
+    --text:#e9eaf2;
+    --text-dim:#7b8096;
+    --text-faint:#454a5e;
+    --cyan:#00e5ff;
+    --magenta:#ff2ec4;
+    --purple:#9d5cff;
+    --steel:#4a5068;
+    --amber:#ffb020;
+    --danger:#ff4d5e;
+    --grad: linear-gradient(120deg, var(--cyan), var(--purple) 55%, var(--magenta));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #14182a 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #1a1230 0%, transparent 55%),
+      var(--void);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    padding-bottom:80px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  .disp{ font-family:'Chakra Petch', sans-serif; }
+
+  /* ---------- layout shell ---------- */
+  .wrap{ max-width:720px; margin:0 auto; padding:20px 18px 0; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 2px 20px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:22px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand-mark{
+    width:34px; height:34px; border-radius:8px;
+    background:var(--grad);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 22px -4px rgba(157,92,255,0.6);
+  }
+  .brand-mark svg{ width:18px; height:18px; }
+  .brand-name{ font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:18px; letter-spacing:2px; }
+  .brand-sub{ font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-top:1px; }
+
+  .stat-cluster{ display:flex; gap:16px; align-items:center; }
+  .stat-pill{
+    display:flex; flex-direction:column; align-items:flex-end;
+  }
+  .stat-pill .v{ font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; line-height:1; }
+  .stat-pill .l{ font-size:8px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; margin-top:3px; }
+  .v.streak{ color:var(--amber); }
+  .v.xp{ color:var(--cyan); }
+
+  /* ---------- hero ring ---------- */
+  .hero{
+    display:flex; flex-direction:column; align-items:center;
+    padding:10px 0 28px;
+  }
+  .ring-shell{ position:relative; width:200px; height:200px; }
+  .ring-shell svg{ transform:rotate(-90deg); width:200px; height:200px; }
+  .ring-bg{ fill:none; stroke:var(--border); stroke-width:10; }
+  .ring-fg{ fill:none; stroke:url(#heroGrad); stroke-width:10; stroke-linecap:round; transition:stroke-dashoffset .5s ease; }
+  .ring-center{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+  }
+  .ring-center .n{ font-family:'JetBrains Mono',monospace; font-size:30px; font-weight:700; }
+  .ring-center .n span{ color:var(--text-dim); font-size:16px; }
+  .ring-center .l{ font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-top:4px; }
+
+  .cta{
+    margin-top:20px; border:none; cursor:pointer;
+    background:var(--grad); color:#05060a;
+    font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:13px;
+    letter-spacing:1.5px; text-transform:uppercase;
+    padding:13px 26px; border-radius:30px;
+    box-shadow:0 0 30px -6px rgba(0,229,255,0.45);
+    transition:transform .15s ease;
+  }
+  .cta:active{ transform:scale(.96); }
+  .cta[disabled]{
+    background:var(--elevated); color:var(--text-dim); box-shadow:none; cursor:default;
+  }
+
+  /* ---------- section headers ---------- */
+  .section{ margin-bottom:30px; }
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:12px; padding:0 2px;
+  }
+  .section-title{
+    font-family:'Chakra Petch',sans-serif; font-weight:600; font-size:13px;
+    letter-spacing:2.5px; text-transform:uppercase; color:var(--text);
+  }
+  .section-tag{ font-size:10px; color:var(--text-dim); letter-spacing:1px; }
+
+  /* ---------- HUD card w/ bracket corners ---------- */
+  .card{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px 16px 16px 14px;
+    margin-bottom:10px;
+    display:flex; align-items:center; gap:14px;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .card::before, .card::after{
+    content:''; position:absolute; width:10px; height:10px; opacity:0; transition:opacity .2s ease;
+  }
+  .card::before{ top:-1px; left:-1px; border-top:2px solid var(--cyan); border-left:2px solid var(--cyan); border-radius:4px 0 0 0; }
+  .card::after{ bottom:-1px; right:-1px; border-bottom:2px solid var(--magenta); border-right:2px solid var(--magenta); border-radius:0 0 4px 0; }
+  .card.active{ border-color:var(--border-hi); background:var(--elevated); }
+  .card.active::before, .card.active::after{ opacity:1; }
+  .card.done{ opacity:.55; }
+
+  .card-index{
+    width:26px; height:26px; border-radius:7px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700;
+    background:var(--elevated); color:var(--text-dim); border:1px solid var(--border);
+  }
+  .card.done .card-index{ background:var(--grad); color:#05060a; border:none; }
+  .card.done .card-index::before{ content:'✓'; }
+
+  .card-body{ flex:1; min-width:0; }
+  .card-name{ font-size:14px; font-weight:600; margin-bottom:2px; }
+  .card-sub{ font-size:11.5px; color:var(--text-dim); line-height:1.4; }
+  .card-meta{ display:flex; gap:10px; margin-top:6px; }
+  .chip{
+    font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.5px;
+    color:var(--text-dim); background:var(--elevated); border:1px solid var(--border);
+    padding:2px 7px; border-radius:20px;
+  }
+  .card-btn{
+    flex-shrink:0; width:38px; height:38px; border-radius:50%;
+    border:1px solid var(--border-hi); background:var(--elevated-hi);
+    color:var(--text); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .15s ease;
+  }
+  .card-btn:active{ transform:scale(.9); }
+  .card-btn svg{ width:14px; height:14px; }
+
+  /* desk option grid */
+  .desk-grid{ display:grid; grid-template-columns:1fr; gap:10px; }
+  .desk-card{
+    position:relative; background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:15px; cursor:pointer; transition:all .18s ease;
+  }
+  .desk-card::before, .desk-card::after{ content:''; position:absolute; width:10px; height:10px; }
+  .desk-card::before{ top:-1px; left:-1px; border-top:2px solid var(--purple); border-left:2px solid var(--purple); border-radius:4px 0 0 0; opacity:0; transition:opacity .2s; }
+  .desk-card::after{ bottom:-1px; right:-1px; border-bottom:2px solid var(--cyan); border-right:2px solid var(--cyan); border-radius:0 0 4px 0; opacity:0; transition:opacity .2s; }
+  .desk-card:active{ transform:scale(.98); }
+  .desk-card:hover::before, .desk-card:hover::after{ opacity:1; }
+  .desk-letter{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:24px; height:24px; border-radius:6px; font-family:'JetBrains Mono',monospace;
+    font-weight:700; font-size:12px; background:var(--elevated); border:1px solid var(--border);
+    color:var(--purple); margin-bottom:8px;
+  }
+  .desk-name{ font-size:14px; font-weight:600; margin-bottom:4px; }
+  .desk-steps{ font-size:11.5px; color:var(--text-dim); line-height:1.5; }
+  .desk-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+  .desk-count{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); }
+  .desk-count.has{ color:var(--cyan); }
+  .go-arrow{ color:var(--text-dim); font-size:16px; }
+
+  /* ---------- badges ---------- */
+  .badge-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .badge{
+    aspect-ratio:1; border-radius:10px; background:var(--surface); border:1px solid var(--border);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    padding:8px; text-align:center; opacity:.4;
+  }
+  .badge-days{ font-size:22px; font-weight:700; color:var(--text-faint); line-height:1; }
+  .badge-unit{ font-size:7.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--text-faint); margin-top:2px; }
+  .badge-label{ font-size:9px; letter-spacing:.5px; text-transform:uppercase; color:var(--text-dim); line-height:1.3; margin-top:4px; font-weight:600; }
+  .badge-progress{ width:70%; height:3px; border-radius:2px; background:var(--elevated-hi); margin-top:7px; overflow:hidden; }
+  .badge-progress-fill{ height:100%; background:var(--grad); }
+  .badge-progress-txt{ font-size:7.5px; color:var(--text-faint); margin-top:3px; }
+
+  .badge.unlocked{ opacity:1; border-color:var(--border-hi); background:var(--elevated); }
+  .badge.unlocked .badge-days{ color:var(--text); }
+  .badge.unlocked .badge-unit{ color:var(--text-dim); }
+  .badge.unlocked .badge-label{ color:var(--text); }
+  .badge.unlocked.t1{ border-color:#2a5560; box-shadow:0 0 14px -6px rgba(0,229,255,0.5); }
+  .badge.unlocked.t1 .badge-days{ color:var(--cyan); }
+  .badge.unlocked.t2{ border-color:#4a3a6a; box-shadow:0 0 16px -6px rgba(157,92,255,0.55); }
+  .badge.unlocked.t2 .badge-days{ color:var(--purple); }
+  .badge.unlocked.t3{ border-color:#6a2f5a; box-shadow:0 0 18px -6px rgba(255,46,196,0.55); }
+  .badge.unlocked.t3 .badge-days{ background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .badge.unlocked.t4{ border-color:var(--amber); box-shadow:0 0 22px -5px rgba(255,176,32,0.6); }
+  .badge.unlocked.t4 .badge-days{ background:linear-gradient(120deg,var(--amber),var(--magenta)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .badge.unlocked.t4 .badge-label{ color:var(--amber); }
+
+  /* ---------- consistency heatmap ---------- */
+  .heatmap-wrap{ overflow-x:auto; padding:2px 2px 6px; }
+  .heatmap-grid{
+    display:grid; grid-auto-flow:column; grid-template-rows:repeat(7, 10px);
+    gap:3px; width:max-content;
+  }
+  .hc{ width:10px; height:10px; border-radius:2px; background:var(--elevated); border:1px solid var(--border); }
+  .hc-desk{ background:var(--steel); border-color:var(--steel); }
+  .hc-morning{ background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 4px 0 rgba(0,229,255,0.45); }
+  .hc-full{ background:linear-gradient(135deg,var(--cyan),var(--magenta)); border-color:var(--purple); box-shadow:0 0 6px 0 rgba(157,92,255,0.65); }
+  .heatmap-legend{ display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; padding:0 2px; }
+  .hl-item{ display:flex; align-items:center; gap:5px; font-size:9.5px; color:var(--text-dim); }
+  .hl-swatch{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+  .hl-none{ background:var(--elevated); border:1px solid var(--border); }
+  .hl-desk{ background:var(--steel); }
+  .hl-morning{ background:var(--cyan); }
+  .hl-full{ background:linear-gradient(135deg,var(--cyan),var(--magenta)); }
+
+  /* ---------- footer ---------- */
+  .foot-note{ text-align:center; color:var(--text-faint); font-size:10.5px; letter-spacing:.5px; padding:18px 0 6px; }
+
+  /* ---------- overlay / timer ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(6,7,12,0.92); backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center; z-index:100;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .overlay.open{ opacity:1; pointer-events:auto; }
+  .timer-panel{ width:min(380px, 90vw); text-align:center; }
+  .timer-eyebrow{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:3px; color:var(--text-dim); text-transform:uppercase; margin-bottom:6px; }
+  .timer-title{ font-family:'Chakra Petch',sans-serif; font-size:20px; font-weight:600; margin-bottom:26px; padding:0 10px; }
+  .timer-ring{ position:relative; width:260px; height:260px; margin:0 auto; }
+  .timer-ring svg{ transform:rotate(-90deg); width:260px; height:260px; }
+  .t-ring-bg{ fill:none; stroke:var(--border); stroke-width:8; }
+  .t-ring-fg{ fill:none; stroke:url(#timerGrad); stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset .12s linear; }
+  .timer-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .timer-num{ font-family:'JetBrains Mono',monospace; font-size:52px; font-weight:700; letter-spacing:-1px; }
+  .timer-side{ font-size:11px; letter-spacing:2px; color:var(--purple); text-transform:uppercase; margin-top:4px; font-family:'JetBrains Mono',monospace;}
+  .timer-controls{ display:flex; justify-content:center; gap:14px; margin-top:30px; }
+  .tc-btn{
+    border:1px solid var(--border-hi); background:var(--elevated-hi); color:var(--text);
+    font-family:'Chakra Petch',sans-serif; font-size:12px; font-weight:600; letter-spacing:1px;
+    text-transform:uppercase; padding:11px 20px; border-radius:24px; cursor:pointer;
+  }
+  .tc-btn.primary{ background:var(--grad); color:#05060a; border:none; }
+  .tc-btn:active{ transform:scale(.95); }
+  .timer-progress-dots{ display:flex; justify-content:center; gap:6px; margin-top:22px; }
+  .tdot{ width:6px; height:6px; border-radius:50%; background:var(--border-hi); }
+  .tdot.on{ background:var(--cyan); }
+  .tdot.done{ background:var(--purple); }
+
+  /* completion flash */
+  .complete-panel{ text-align:center; }
+  .complete-icon{ font-size:46px; margin-bottom:14px; }
+  .complete-title{ font-family:'Chakra Petch',sans-serif; font-size:22px; font-weight:700; margin-bottom:8px;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .complete-sub{ color:var(--text-dim); font-size:13px; margin-bottom:22px; }
+  .xp-toast{
+    display:inline-flex; align-items:center; gap:6px; background:var(--elevated); border:1px solid var(--border-hi);
+    padding:8px 16px; border-radius:24px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--cyan);
+    margin-bottom:22px;
+  }
+  .badge-unlock-row{ display:flex; justify-content:center; gap:10px; margin-bottom:22px; flex-wrap:wrap; }
+  .badge-unlock{
+    display:flex; flex-direction:column; align-items:center; gap:4px; background:var(--elevated);
+    border:1px solid var(--purple); border-radius:10px; padding:10px 12px; box-shadow:0 0 16px -4px rgba(157,92,255,.7);
+  }
+
+  @media (min-width:520px){
+    .desk-grid{ grid-template-columns:1fr 1fr; }
+  }
+  @media (max-width:380px){
+    .timer-ring{ width:220px; height:220px; }
+    .timer-ring svg{ width:220px; height:220px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v6M12 16v6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2" stroke="#05060a" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">ANCHOR</div>
+        <div class="brand-sub">Capsule Opener System</div>
+      </div>
+    </div>
+    <div class="stat-cluster">
+      <div class="stat-pill">
+        <div class="v streak mono" id="statStreak">0</div>
+        <div class="l">streak</div>
+      </div>
+      <div class="stat-pill">
+        <div class="v xp mono" id="statXP">0</div>
+        <div class="l">xp · lv <span id="statLevel">1</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="ring-shell">
+      <svg viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00e5ff"/>
+            <stop offset="55%" stop-color="#9d5cff"/>
+            <stop offset="100%" stop-color="#ff2ec4"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="100" cy="100" r="90"/>
+        <circle class="ring-fg" id="heroRing" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="565.48"/>
+      </svg>
+      <div class="ring-center">
+        <div class="n mono"><span id="heroDone">0</span><span>/4</span></div>
+        <div class="l">morning set</div>
+      </div>
+    </div>
+    <button class="cta disp" id="heroCta">Start Morning Sequence</button>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title disp">Morning Sequence</div>
+      <div class="section-tag mono">ordered · once daily</div>
+    </div>
+    <div id="morningList"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title disp">Anti-Chair Resets</div>
+      <div class="section-tag mono" id="deskCountLabel">0 today</div>
+    </div>
+    <div class="desk-grid" id="deskGrid"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title disp">Consistency Grid</div>
+      <div class="section-tag mono">last 13 weeks</div>
+    </div>
+    <div class="heatmap-wrap">
+      <div class="heatmap-grid" id="heatmapGrid"></div>
+    </div>
+    <div class="heatmap-legend mono">
+      <span class="hl-item"><span class="hl-swatch hl-none"></span>None</span>
+      <span class="hl-item"><span class="hl-swatch hl-desk"></span>Desk only</span>
+      <span class="hl-item"><span class="hl-swatch hl-morning"></span>Morning</span>
+      <span class="hl-item"><span class="hl-swatch hl-full"></span>Full system</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title disp">Badges</div>
+      <div class="section-tag mono" id="badgeCountLabel">0/6</div>
+    </div>
+    <div class="badge-grid" id="badgeGrid"></div>
+  </div>
+
+  <div class="foot-note mono">LOCAL STORAGE · YOUR DEVICE ONLY · NO ACCOUNT</div>
+</div>
+
+<!-- TIMER OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="timer-panel" id="timerPanel"></div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const MORNING = [
+  { id:'m1', name:"Bed Child's Pose → Cobra Flow", sub:"Cycles the spine through decompression and gentle extension to flush the discs.", xp:12, phases:[{label:"Hold",sec:60}] },
+  { id:'m2', name:"90/90 Hip Switches + Forward Hinge", sub:"Hinge over the front shin to clear the glutes, sit tall to force internal rotation.", xp:12, phases:[{label:"Both Sides",sec:60}] },
+  { id:'m3', name:"World's Greatest Stretch + Hamstring Floss", sub:"Deep lunge, elbow to instep, thoracic twist — then rock hips back to floss the sciatic track.", xp:16, phases:[{label:"Left",sec:60},{label:"Right",sec:60}] },
+  { id:'m4', name:"Resting Deep Paleo Squat", sub:"Sit deep and breathe, letting the rotated hips settle into a neutral baseline.", xp:12, phases:[{label:"Hold",sec:60}] },
+];
+
+const DESK = [
+  { id:'dA', letter:'A', name:'Neurological Shock', desc:'Horse Stance → RKC Plank', xp:14,
+    phases:[{label:"Horse Stance",sec:30},{label:"RKC Plank",sec:15}] },
+  { id:'dB', letter:'B', name:'Mechanical Pulley', desc:'Couch Stretch → Elephant Walk', xp:16,
+    phases:[{label:"Couch — Left",sec:30},{label:"Couch — Right",sec:30},{label:"Elephant Walk",sec:60}] },
+  { id:'dC', letter:'C', name:'Upper Reset', desc:'Wall Slides → Pec/Thread-the-Needle → Exhale', xp:14,
+    phases:[{label:"Wall Slides",sec:40},{label:"Pec Stretch — L/R",sec:30},{label:"Exhale Reset",sec:15}] },
+];
+
+const BADGES = [
+  { id:'d1',   days:1,   label:'1 Day',    tier:1 },
+  { id:'d3',   days:3,   label:'3 Days',   tier:1 },
+  { id:'d7',   days:7,   label:'1 Week',   tier:2 },
+  { id:'d14',  days:14,  label:'2 Weeks',  tier:2 },
+  { id:'d30',  days:30,  label:'1 Month',  tier:3 },
+  { id:'d60',  days:60,  label:'2 Months', tier:3 },
+  { id:'d90',  days:90,  label:'3 Months', tier:4 },
+  { id:'d180', days:180, label:'6 Months', tier:4 },
+  { id:'d365', days:365, label:'1 Year',   tier:4 },
+];
+
+/* ============ STATE ============ */
+const STORAGE_KEY = 'anchor_state_v1';
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function defaultState(){
+  return {
+    xp:0,
+    streak:0,
+    longestStreak:0,
+    totalCompletions:0,
+    totalDeskResets:0,
+    fullSystemDays:0,
+    unlockedBadges:[],
+    history:{}, // date -> {morningSteps:[bool,bool,bool,bool], deskCount:0, deskOptions:[], morningFullyDone:bool, fullSystemCounted:bool}
+  };
+}
+let state = load();
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(defaultState(), parsed);
+  }catch(e){ return defaultState(); }
+}
+function save(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+function today(){
+  const t = todayStr();
+  if(!state.history[t]){
+    state.history[t] = { morningSteps:[false,false,false,false], deskCount:0, deskOptions:[], morningFullyDone:false, fullSystemCounted:false };
+  }
+  return state.history[t];
+}
+
+/* recompute streak by walking backward from today */
+function recomputeStreak(){
+  let streak = 0;
+  let d = new Date();
+  while(true){
+    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const rec = state.history[key];
+    if(rec && rec.morningFullyDone){
+      streak++;
+      d.setDate(d.getDate()-1);
+    } else {
+      break;
+    }
+  }
+  state.streak = streak;
+  if(streak > state.longestStreak) state.longestStreak = streak;
+}
+
+function checkFullSystem(rec){
+  if(rec.morningFullyDone && rec.deskCount > 0 && !rec.fullSystemCounted){
+    rec.fullSystemCounted = true;
+    state.fullSystemDays++;
+  }
+}
+
+function checkBadges(){
+  const newly = [];
+  BADGES.forEach(b=>{
+    if(!state.unlockedBadges.includes(b.id) && state.longestStreak >= b.days){
+      state.unlockedBadges.push(b.id);
+      newly.push(b);
+    }
+  });
+  return newly;
+}
+
+/* ============ RENDER ============ */
+function level(xp){ return Math.floor(xp/150)+1; }
+
+function render(){
+  const rec = today();
+  document.getElementById('statStreak').textContent = state.streak;
+  document.getElementById('statXP').textContent = state.xp;
+  document.getElementById('statLevel').textContent = level(state.xp);
+
+  const doneCount = rec.morningSteps.filter(Boolean).length;
+  document.getElementById('heroDone').textContent = doneCount;
+  const circumference = 565.48;
+  const offset = circumference - (doneCount/4)*circumference;
+  document.getElementById('heroRing').style.strokeDashoffset = offset;
+
+  const cta = document.getElementById('heroCta');
+  const nextIdx = rec.morningSteps.findIndex(v=>!v);
+  if(nextIdx === -1){
+    cta.textContent = 'Morning Sequence Complete';
+    cta.disabled = true;
+  } else {
+    cta.disabled = false;
+    cta.textContent = nextIdx === 0 ? 'Start Morning Sequence' : 'Continue Sequence';
+    cta.onclick = ()=> runMovement('morning', nextIdx);
+  }
+
+  // morning list
+  const ml = document.getElementById('morningList');
+  ml.innerHTML = '';
+  MORNING.forEach((m, i)=>{
+    const done = rec.morningSteps[i];
+    const isNext = i === nextIdx;
+    const card = document.createElement('div');
+    card.className = 'card' + (done?' done':'') + (isNext?' active':'');
+    card.innerHTML = `
+      <div class="card-index mono">${done?'':i+1}</div>
+      <div class="card-body">
+        <div class="card-name">${m.name}</div>
+        <div class="card-sub">${m.sub}</div>
+        <div class="card-meta">
+          <span class="chip mono">${m.phases.map(p=>p.sec+'s').join(' + ')}</span>
+          <span class="chip mono">+${m.xp} xp</span>
+        </div>
+      </div>
+      <button class="card-btn" aria-label="Start">
+        ${done ? '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="'+getComputedStyle(document.documentElement).getPropertyValue('--cyan')+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+               : '<svg viewBox="0 0 24 24" fill="none"><path d="M7 5v14l11-7z" fill="currentColor"/></svg>'}
+      </button>
+    `;
+    if(!done){
+      card.querySelector('.card-btn').onclick = ()=> runMovement('morning', i);
+      card.style.cursor = 'pointer';
+      card.onclick = (e)=>{ if(e.target.closest('.card-btn')) return; runMovement('morning', i); };
+    }
+    ml.appendChild(card);
+  });
+
+  // desk grid
+  document.getElementById('deskCountLabel').textContent = rec.deskCount + ' today';
+  const dg = document.getElementById('deskGrid');
+  dg.innerHTML = '';
+  DESK.forEach(d=>{
+    const count = rec.deskOptions.filter(x=>x===d.id).length;
+    const card = document.createElement('div');
+    card.className = 'desk-card';
+    card.innerHTML = `
+      <div class="desk-letter mono">${d.letter}</div>
+      <div class="desk-name">${d.name}</div>
+      <div class="desk-steps">${d.desc}</div>
+      <div class="desk-foot">
+        <span class="desk-count mono ${count>0?'has':''}">${count>0 ? '×'+count+' today' : '+'+d.xp+' xp'}</span>
+        <span class="go-arrow">→</span>
+      </div>
+    `;
+    card.onclick = ()=> runMovement('desk', DESK.indexOf(d));
+    dg.appendChild(card);
+  });
+
+  // badges
+  document.getElementById('badgeCountLabel').textContent = state.unlockedBadges.length + '/' + BADGES.length;
+  const bg = document.getElementById('badgeGrid');
+  bg.innerHTML = '';
+  const nextTarget = BADGES.find(b => !state.unlockedBadges.includes(b.id));
+  BADGES.forEach(b=>{
+    const unlocked = state.unlockedBadges.includes(b.id);
+    const el = document.createElement('div');
+    el.className = 'badge t'+b.tier + (unlocked?' unlocked':'');
+    if(unlocked){
+      el.innerHTML = `
+        <div class="badge-days mono">${b.days}</div>
+        <div class="badge-unit">day${b.days>1?'s':''} streak</div>
+        <div class="badge-label">${b.label}</div>
+      `;
+    } else if(b.id === (nextTarget && nextTarget.id)){
+      const pct = Math.min(100, Math.round((state.streak / b.days) * 100));
+      el.innerHTML = `
+        <div class="badge-days mono">${b.days}</div>
+        <div class="badge-unit">day${b.days>1?'s':''} streak</div>
+        <div class="badge-label">${b.label}</div>
+        <div class="badge-progress"><div class="badge-progress-fill" style="width:${pct}%"></div></div>
+        <div class="badge-progress-txt mono">${state.streak}/${b.days}</div>
+      `;
+    } else {
+      el.innerHTML = `
+        <div class="badge-days mono">${b.days}</div>
+        <div class="badge-unit">day${b.days>1?'s':''} streak</div>
+        <div class="badge-label">${b.label}</div>
+      `;
+    }
+    bg.appendChild(el);
+  });
+
+  buildHeatmap();
+  save();
+}
+
+/* ============ CONSISTENCY HEATMAP ============ */
+function buildHeatmap(){
+  const container = document.getElementById('heatmapGrid');
+  if(!container) return;
+  container.innerHTML = '';
+  const totalDays = 91; // ~13 weeks
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const start = new Date(now);
+  start.setDate(start.getDate() - (totalDays - 1));
+  start.setDate(start.getDate() - start.getDay()); // snap back to Sunday
+
+  let cur = new Date(start);
+  let cells = 0;
+  while(cur <= now && cells < 105){
+    const key = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
+    const rec = state.history[key];
+    let cls = 'hc-none';
+    let label = 'no activity';
+    if(rec){
+      if(rec.morningFullyDone && rec.deskCount > 0){ cls = 'hc-full'; label = 'full system'; }
+      else if(rec.morningFullyDone){ cls = 'hc-morning'; label = 'morning complete'; }
+      else if(rec.deskCount > 0){ cls = 'hc-desk'; label = rec.deskCount + ' desk reset' + (rec.deskCount>1?'s':''); }
+    }
+    const cell = document.createElement('div');
+    cell.className = 'hc ' + cls;
+    cell.title = key + ' — ' + label;
+    container.appendChild(cell);
+    cur.setDate(cur.getDate()+1);
+    cells++;
+  }
+}
+
+/* ============ TIMER ENGINE ============ */
+let timerState = null; // { kind, index, item, phaseIdx, remaining, running, intervalId }
+const overlay = document.getElementById('overlay');
+const panel = document.getElementById('timerPanel');
+
+function runMovement(kind, index){
+  const item = kind === 'morning' ? MORNING[index] : DESK[index];
+  timerState = { kind, index, item, phaseIdx:0, remaining:item.phases[0].sec, running:true };
+  openOverlay();
+  renderTimerPanel();
+  tick(); // immediate paint
+  startInterval();
+}
+
+function startInterval(){
+  clearInterval(timerState.intervalId);
+  timerState.intervalId = setInterval(()=>{
+    if(!timerState.running) return;
+    timerState.remaining -= 0.1;
+    if(timerState.remaining <= 0){
+      nextPhase();
+    } else {
+      updateRingOnly();
+    }
+  }, 100);
+}
+
+function nextPhase(){
+  const item = timerState.item;
+  if(timerState.phaseIdx < item.phases.length - 1){
+    timerState.phaseIdx++;
+    timerState.remaining = item.phases[timerState.phaseIdx].sec;
+    renderTimerPanel();
+  } else {
+    clearInterval(timerState.intervalId);
+    completeMovement();
+  }
+}
+
+function skipPhase(){
+  nextPhase();
+}
+
+function togglePause(){
+  timerState.running = !timerState.running;
+  renderTimerPanel();
+}
+
+function cancelTimer(){
+  clearInterval(timerState?.intervalId);
+  timerState = null;
+  closeOverlay();
+}
+
+function openOverlay(){ overlay.classList.add('open'); }
+function closeOverlay(){ overlay.classList.remove('open'); }
+
+function renderTimerPanel(){
+  const item = timerState.item;
+  const phase = item.phases[timerState.phaseIdx];
+  const circumference = 2*Math.PI*118; // r=118 scaled via viewbox 260 -> using r ~ (260/2 - 12)=118? we use r matching svg below
+  panel.innerHTML = `
+    <div class="timer-eyebrow mono">${timerState.kind === 'morning' ? 'MORNING · STEP '+(timerState.index+1)+'/4' : 'DESK RESET · OPTION '+item.letter}</div>
+    <div class="timer-title disp">${item.name}</div>
+    <div class="timer-ring">
+      <svg viewBox="0 0 260 260">
+        <defs>
+          <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00e5ff"/>
+            <stop offset="55%" stop-color="#9d5cff"/>
+            <stop offset="100%" stop-color="#ff2ec4"/>
+          </linearGradient>
+        </defs>
+        <circle class="t-ring-bg" cx="130" cy="130" r="118"/>
+        <circle class="t-ring-fg" id="timerRing" cx="130" cy="130" r="118" stroke-dasharray="741.4"/>
+      </svg>
+      <div class="timer-center">
+        <div class="timer-num mono" id="timerNum">${Math.ceil(timerState.remaining)}</div>
+        <div class="timer-side">${phase.label}</div>
+      </div>
+    </div>
+    <div class="timer-progress-dots">
+      ${item.phases.map((p,i)=>`<div class="tdot ${i===timerState.phaseIdx?'on':(i<timerState.phaseIdx?'done':'')}"></div>`).join('')}
+    </div>
+    <div class="timer-controls">
+      <button class="tc-btn" id="btnCancel">Exit</button>
+      <button class="tc-btn primary" id="btnPause">${timerState.running?'Pause':'Resume'}</button>
+      <button class="tc-btn" id="btnSkip">Skip</button>
+    </div>
+  `;
+  document.getElementById('btnCancel').onclick = cancelTimer;
+  document.getElementById('btnPause').onclick = togglePause;
+  document.getElementById('btnSkip').onclick = skipPhase;
+  updateRingOnly();
+}
+
+function updateRingOnly(){
+  const ring = document.getElementById('timerRing');
+  const numEl = document.getElementById('timerNum');
+  if(!ring || !timerState) return;
+  const phase = timerState.item.phases[timerState.phaseIdx];
+  const circumference = 741.4;
+  const frac = Math.max(0, timerState.remaining) / phase.sec;
+  ring.style.strokeDashoffset = circumference * (1-frac);
+  if(numEl) numEl.textContent = Math.max(0, Math.ceil(timerState.remaining));
+  const btnPause = document.getElementById('btnPause');
+  if(btnPause) btnPause.textContent = timerState.running ? 'Pause' : 'Resume';
+}
+function tick(){ updateRingOnly(); }
+
+function completeMovement(){
+  const { kind, index, item } = timerState;
+  const rec = today();
+  let newlyUnlocked = [];
+
+  if(kind === 'morning'){
+    rec.morningSteps[index] = true;
+    state.xp += item.xp;
+    state.totalCompletions++;
+    if(rec.morningSteps.every(Boolean) && !rec.morningFullyDone){
+      rec.morningFullyDone = true;
+      recomputeStreak();
+      checkFullSystem(rec);
+    }
+  } else {
+    rec.deskCount++;
+    rec.deskOptions.push(item.id);
+    state.xp += item.xp;
+    state.totalDeskResets++;
+    checkFullSystem(rec);
+  }
+
+  newlyUnlocked = checkBadges();
+  save();
+  showCompletion(item, kind, newlyUnlocked);
+}
+
+function showCompletion(item, kind, newlyUnlocked){
+  panel.innerHTML = `
+    <div class="complete-panel">
+      <div class="complete-icon">✦</div>
+      <div class="complete-title disp">${kind==='morning' ? 'Segment Locked In' : 'Reset Complete'}</div>
+      <div class="complete-sub">${item.name}</div>
+      <div class="xp-toast mono">+ ${item.xp} XP</div>
+      ${newlyUnlocked.length ? `
+        <div class="badge-unlock-row">
+          ${newlyUnlocked.map(b=>`<div class="badge-unlock"><div class="badge-icon">${b.icon}</div><div class="badge-label mono">${b.label}</div></div>`).join('')}
+        </div>
+      ` : ''}
+      <div class="timer-controls" style="margin-top:6px;">
+        <button class="tc-btn primary" id="btnDone">Done</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('btnDone').onclick = ()=>{
+    timerState = null;
+    closeOverlay();
+    render();
+  };
+}
+
+/* ============ INIT ============ */
+today();
+recomputeStreak();
+checkBadges();
+render();
+</script>
+</body>
+</html>
