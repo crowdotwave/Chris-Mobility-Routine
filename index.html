@@ -3,7 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>ANCHOR // Capsule Opener</title>
+<title>Chris' Anti-Chair Routine</title>
+
+<!-- Home screen / PWA setup -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Anti-Chair">
+<meta name="theme-color" content="#0a0b10">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -60,8 +71,7 @@
     box-shadow:0 0 22px -4px rgba(157,92,255,0.6);
   }
   .brand-mark svg{ width:18px; height:18px; }
-  .brand-name{ font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:18px; letter-spacing:2px; }
-  .brand-sub{ font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-top:1px; }
+  .brand-name{ font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:clamp(12px,3.6vw,15px); letter-spacing:1px; line-height:1.25; max-width:190px; }
 
   .stat-cluster{ display:flex; gap:16px; align-items:center; }
   .stat-pill{
@@ -143,6 +153,9 @@
   }
   .card.done .card-index{ background:var(--grad); color:#05060a; border:none; }
   .card.done .card-index::before{ content:'✓'; }
+  .card.night.done .card-index{ background:linear-gradient(120deg,var(--purple),var(--magenta)); }
+  .card.night.active::before{ border-color:var(--purple); }
+  .card.night.active::after{ border-color:var(--magenta); }
 
   .card-body{ flex:1; min-width:0; }
   .card-name{ font-size:14px; font-weight:600; margin-bottom:2px; }
@@ -241,24 +254,34 @@
 
   .heatmap-wrap{ overflow-x:auto; padding:2px 2px 6px; }
   .heatmap-months{
-    display:grid; grid-auto-flow:column; gap:3px; margin-bottom:5px;
-    font-size:8.5px; color:var(--text-faint); letter-spacing:.5px; white-space:nowrap;
+    display:grid; grid-auto-flow:column; gap:4px; margin-bottom:6px;
+    font-size:9px; color:var(--text-faint); letter-spacing:.5px; white-space:nowrap;
   }
   .heatmap-grid{
-    display:grid; grid-auto-flow:column; grid-template-rows:repeat(7, 12px);
-    gap:3px; width:max-content;
+    display:grid; grid-auto-flow:column; grid-template-rows:repeat(7, 14px);
+    gap:4px; width:max-content;
   }
-  .hc{ width:12px; height:12px; border-radius:3px; background:var(--elevated-hi); border:1px solid var(--border); }
-  .hc-desk{ background:var(--steel); border-color:var(--steel); }
-  .hc-morning{ background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 5px 0 rgba(0,229,255,0.5); }
-  .hc-full{ background:linear-gradient(135deg,var(--cyan),var(--magenta)); border-color:var(--purple); box-shadow:0 0 7px 0 rgba(157,92,255,0.7); }
-  .heatmap-legend{ display:flex; gap:14px; flex-wrap:wrap; margin-top:12px; padding:0 2px; }
+  .hc{ width:14px; height:14px; border-radius:4px; background:var(--elevated-hi); border:1px solid var(--border); transition:transform .12s ease; }
+  .hc:hover{ transform:scale(1.25); }
+  /* single category */
+  .hc-m{ background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 6px 0 rgba(0,229,255,0.5); }
+  .hc-n{ background:var(--purple); border-color:var(--purple); box-shadow:0 0 6px 0 rgba(157,92,255,0.5); }
+  .hc-d{ background:var(--steel); border-color:var(--steel); }
+  /* two categories — hard half-split */
+  .hc-mn{ background:linear-gradient(90deg, var(--cyan) 0%, var(--cyan) 50%, var(--purple) 50%, var(--purple) 100%); border-color:var(--purple); box-shadow:0 0 6px 0 rgba(157,92,255,0.4); }
+  .hc-md{ background:linear-gradient(90deg, var(--cyan) 0%, var(--cyan) 50%, var(--steel) 50%, var(--steel) 100%); border-color:var(--cyan); }
+  .hc-nd{ background:linear-gradient(90deg, var(--purple) 0%, var(--purple) 50%, var(--steel) 50%, var(--steel) 100%); border-color:var(--purple); }
+  /* all three — full reward gradient */
+  .hc-full{ background:linear-gradient(135deg, var(--cyan), var(--purple) 50%, var(--magenta)); border-color:var(--magenta); box-shadow:0 0 9px 0 rgba(255,46,196,0.75); }
+  .heatmap-legend{ display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; padding:0 2px; }
   .hl-item{ display:flex; align-items:center; gap:5px; font-size:9.5px; color:var(--text-dim); }
-  .hl-swatch{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+  .hl-swatch{ width:10px; height:10px; border-radius:3px; display:inline-block; }
   .hl-none{ background:var(--elevated-hi); border:1px solid var(--border); }
   .hl-desk{ background:var(--steel); }
   .hl-morning{ background:var(--cyan); }
-  .hl-full{ background:linear-gradient(135deg,var(--cyan),var(--magenta)); }
+  .hl-night{ background:var(--purple); }
+  .hl-combo{ background:linear-gradient(90deg, var(--cyan) 0%, var(--cyan) 50%, var(--purple) 50%, var(--purple) 100%); }
+  .hl-full{ background:linear-gradient(135deg,var(--cyan),var(--purple) 50%,var(--magenta)); }
 
   /* ---------- footer ---------- */
   .foot-note{ text-align:center; color:var(--text-faint); font-size:10.5px; letter-spacing:.5px; padding:18px 0 6px; }
@@ -329,8 +352,7 @@
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v6M12 16v6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2" stroke="#05060a" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
       <div>
-        <div class="brand-name">ANCHOR</div>
-        <div class="brand-sub">Capsule Opener System</div>
+        <div class="brand-name">CHRIS' ANTI-CHAIR ROUTINE</div>
       </div>
     </div>
     <div class="stat-cluster">
@@ -389,8 +411,10 @@
     </div>
     <div class="heatmap-legend mono">
       <span class="hl-item"><span class="hl-swatch hl-none"></span>None</span>
-      <span class="hl-item"><span class="hl-swatch hl-desk"></span>Desk only</span>
+      <span class="hl-item"><span class="hl-swatch hl-desk"></span>Desk</span>
       <span class="hl-item"><span class="hl-swatch hl-morning"></span>Morning</span>
+      <span class="hl-item"><span class="hl-swatch hl-night"></span>Night</span>
+      <span class="hl-item"><span class="hl-swatch hl-combo"></span>2 done</span>
       <span class="hl-item"><span class="hl-swatch hl-full"></span>Full system</span>
     </div>
   </div>
@@ -401,6 +425,14 @@
       <div class="section-tag mono">ordered · once daily</div>
     </div>
     <div id="morningList"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title disp">Night Sequence</div>
+      <div class="section-tag mono" id="nightCountLabel">0/2 done</div>
+    </div>
+    <div id="nightList"></div>
   </div>
 
   <div class="section">
@@ -434,6 +466,11 @@ const MORNING = [
   { id:'m2', name:"90/90 Hip Switches + Forward Hinge", sub:"Hinge over the front shin to clear the glutes, sit tall to force internal rotation.", xp:12, phases:[{label:"Both Sides",sec:60}] },
   { id:'m3', name:"World's Greatest Stretch + Hamstring Floss", sub:"Deep lunge, elbow to instep, thoracic twist — then rock hips back to floss the sciatic track.", xp:16, phases:[{label:"Left",sec:60},{label:"Right",sec:60}] },
   { id:'m4', name:"Resting Deep Paleo Squat", sub:"Sit deep and breathe, letting the rotated hips settle into a neutral baseline.", xp:12, phases:[{label:"Hold",sec:60}] },
+];
+
+const NIGHT = [
+  { id:'n1', name:"Supine Spinal Twist", sub:"Rotational release for the lumbar/thoracic spine, fully relaxed and unweighted.", xp:12, phases:[{label:"Left",sec:45},{label:"Right",sec:45}] },
+  { id:'n2', name:"Figure-4 Stretch", sub:"Deep glute/piriformis release lying down, long low-intensity hold.", xp:14, phases:[{label:"Left",sec:60},{label:"Right",sec:60}] },
 ];
 
 const DESK = [
@@ -490,19 +527,23 @@ function save(){
 function today(){
   const t = todayStr();
   if(!state.history[t]){
-    state.history[t] = { morningSteps:[false,false,false,false], deskCount:0, deskOptions:[], morningFullyDone:false, fullSystemCounted:false };
+    state.history[t] = { morningSteps:[false,false,false,false], nightSteps:[false,false], deskCount:0, deskOptions:[], morningFullyDone:false, nightFullyDone:false, fullSystemCounted:false };
   }
-  return state.history[t];
+  // migrate older saved records that predate the night sequence
+  const rec = state.history[t];
+  if(!rec.nightSteps) rec.nightSteps = [false,false];
+  if(typeof rec.nightFullyDone === 'undefined') rec.nightFullyDone = false;
+  return rec;
 }
 
-/* recompute streak by walking backward from today */
+/* recompute streak by walking backward from today — requires Morning AND Night both complete */
 function recomputeStreak(){
   let streak = 0;
   let d = new Date();
   while(true){
     const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     const rec = state.history[key];
-    if(rec && rec.morningFullyDone){
+    if(rec && rec.morningFullyDone && rec.nightFullyDone){
       streak++;
       d.setDate(d.getDate()-1);
     } else {
@@ -514,7 +555,7 @@ function recomputeStreak(){
 }
 
 function checkFullSystem(rec){
-  if(rec.morningFullyDone && rec.deskCount > 0 && !rec.fullSystemCounted){
+  if(rec.morningFullyDone && rec.nightFullyDone && rec.deskCount > 0 && !rec.fullSystemCounted){
     rec.fullSystemCounted = true;
     state.fullSystemDays++;
   }
@@ -533,6 +574,41 @@ function checkBadges(){
 
 /* ============ RENDER ============ */
 function level(xp){ return Math.floor(xp/150)+1; }
+
+function renderSequenceCards(containerId, data, doneArr, kind){
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  const nextIdx = doneArr.findIndex(v=>!v);
+  data.forEach((m, i)=>{
+    const done = doneArr[i];
+    const isNext = i === nextIdx;
+    const card = document.createElement('div');
+    card.className = 'card' + (kind==='night' ? ' night' : '') + (done?' done':'') + (isNext?' active':'');
+    const checkColor = kind==='night' ? getComputedStyle(document.documentElement).getPropertyValue('--purple') : getComputedStyle(document.documentElement).getPropertyValue('--cyan');
+    card.innerHTML = `
+      <div class="card-index mono">${done?'':i+1}</div>
+      <div class="card-body">
+        <div class="card-name">${m.name}</div>
+        <div class="card-sub">${m.sub}</div>
+        <div class="card-meta">
+          <span class="chip mono">${m.phases.map(p=>p.sec+'s').join(' + ')}</span>
+          <span class="chip mono">+${m.xp} xp</span>
+        </div>
+      </div>
+      <button class="card-btn" aria-label="Start">
+        ${done ? '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="'+checkColor+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+               : '<svg viewBox="0 0 24 24" fill="none"><path d="M7 5v14l11-7z" fill="currentColor"/></svg>'}
+      </button>
+    `;
+    if(!done){
+      card.querySelector('.card-btn').onclick = ()=> runMovement(kind, i);
+      card.style.cursor = 'pointer';
+      card.onclick = (e)=>{ if(e.target.closest('.card-btn')) return; runMovement(kind, i); };
+    }
+    container.appendChild(card);
+  });
+  return nextIdx;
+}
 
 function render(){
   const rec = today();
@@ -557,36 +633,11 @@ function render(){
     cta.onclick = ()=> runMovement('morning', nextIdx);
   }
 
-  // morning list
-  const ml = document.getElementById('morningList');
-  ml.innerHTML = '';
-  MORNING.forEach((m, i)=>{
-    const done = rec.morningSteps[i];
-    const isNext = i === nextIdx;
-    const card = document.createElement('div');
-    card.className = 'card' + (done?' done':'') + (isNext?' active':'');
-    card.innerHTML = `
-      <div class="card-index mono">${done?'':i+1}</div>
-      <div class="card-body">
-        <div class="card-name">${m.name}</div>
-        <div class="card-sub">${m.sub}</div>
-        <div class="card-meta">
-          <span class="chip mono">${m.phases.map(p=>p.sec+'s').join(' + ')}</span>
-          <span class="chip mono">+${m.xp} xp</span>
-        </div>
-      </div>
-      <button class="card-btn" aria-label="Start">
-        ${done ? '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="'+getComputedStyle(document.documentElement).getPropertyValue('--cyan')+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-               : '<svg viewBox="0 0 24 24" fill="none"><path d="M7 5v14l11-7z" fill="currentColor"/></svg>'}
-      </button>
-    `;
-    if(!done){
-      card.querySelector('.card-btn').onclick = ()=> runMovement('morning', i);
-      card.style.cursor = 'pointer';
-      card.onclick = (e)=>{ if(e.target.closest('.card-btn')) return; runMovement('morning', i); };
-    }
-    ml.appendChild(card);
-  });
+  // morning + night lists (shared renderer)
+  renderSequenceCards('morningList', MORNING, rec.morningSteps, 'morning');
+  renderSequenceCards('nightList', NIGHT, rec.nightSteps, 'night');
+  const nightDone = rec.nightSteps.filter(Boolean).length;
+  document.getElementById('nightCountLabel').textContent = nightDone + '/' + NIGHT.length + ' done';
 
   // desk grid
   document.getElementById('deskCountLabel').textContent = rec.deskCount + ' today';
@@ -665,8 +716,8 @@ function buildHeatmap(){
   start.setDate(start.getDate() - start.getDay()); // snap back to Sunday
 
   const numWeeks = Math.ceil(((now - start) / 86400000 + 1) / 7);
-  grid.style.gridTemplateColumns = `repeat(${numWeeks}, 12px)`;
-  monthsRow.style.gridTemplateColumns = `repeat(${numWeeks}, 12px)`;
+  grid.style.gridTemplateColumns = `repeat(${numWeeks}, 14px)`;
+  monthsRow.style.gridTemplateColumns = `repeat(${numWeeks}, 14px)`;
 
   let activeDays = 0;
   let cur = new Date(start);
@@ -687,13 +738,8 @@ function buildHeatmap(){
   while(cur <= now){
     const key = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
     const rec = state.history[key];
-    let cls = 'hc-none';
-    let label = 'no activity';
-    if(rec){
-      if(rec.morningFullyDone && rec.deskCount > 0){ cls = 'hc-full'; label = 'full system'; activeDays++; }
-      else if(rec.morningFullyDone){ cls = 'hc-morning'; label = 'morning complete'; activeDays++; }
-      else if(rec.deskCount > 0){ cls = 'hc-desk'; label = rec.deskCount + ' desk reset' + (rec.deskCount>1?'s':''); activeDays++; }
-    }
+    const { cls, label } = classifyDay(rec);
+    if(cls !== 'hc-none') activeDays++;
     const cell = document.createElement('div');
     cell.className = 'hc ' + cls;
     cell.title = key + ' — ' + label;
@@ -707,14 +753,85 @@ function buildHeatmap(){
   if(bestEl) bestEl.textContent = state.longestStreak;
 }
 
+function classifyDay(rec){
+  if(!rec) return { cls:'hc-none', label:'no activity' };
+  const m = !!rec.morningFullyDone;
+  const n = !!rec.nightFullyDone;
+  const d = rec.deskCount > 0;
+  const count = (m?1:0) + (n?1:0) + (d?1:0);
+  if(count === 0) return { cls:'hc-none', label:'no activity' };
+  if(count === 3) return { cls:'hc-full', label:'full system — morning + night + desk' };
+  if(count === 1){
+    if(m) return { cls:'hc-m', label:'morning complete' };
+    if(n) return { cls:'hc-n', label:'night complete' };
+    return { cls:'hc-d', label: rec.deskCount + ' desk reset' + (rec.deskCount>1?'s':'') };
+  }
+  if(m && n) return { cls:'hc-mn', label:'morning + night' };
+  if(m && d) return { cls:'hc-md', label:'morning + desk' };
+  return { cls:'hc-nd', label:'night + desk' };
+}
+
+/* ============ AUDIO CUES ============ */
+let audioCtx = null;
+function ensureAudioCtx(){
+  if(!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    audioCtx = new AC();
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+  return audioCtx;
+}
+function playTone(freq, duration, delay=0, gainPeak=0.16, type='sine'){
+  const ctx = ensureAudioCtx();
+  if(!ctx) return;
+  const t0 = ctx.currentTime + delay;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(gainPeak, t0 + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(t0);
+  osc.stop(t0 + duration + 0.03);
+}
+function playCountdownTick(){ playTone(440, 0.08, 0, 0.09, 'square'); }
+function playPhaseChime(){ playTone(700, 0.16, 0, 0.15); playTone(1050, 0.18, 0.08, 0.12); }
+function playCompleteChime(){ playTone(660, 0.14, 0, 0.15); playTone(880, 0.16, 0.11, 0.15); playTone(1175, 0.24, 0.22, 0.15); }
+
+/* ============ WAKE LOCK ============ */
+let wakeLockSentinel = null;
+async function requestWakeLock(){
+  if(!('wakeLock' in navigator)) return;
+  try{
+    wakeLockSentinel = await navigator.wakeLock.request('screen');
+    wakeLockSentinel.addEventListener('release', ()=>{ wakeLockSentinel = null; });
+  }catch(e){ wakeLockSentinel = null; } // silently ignore — battery saver, unsupported iOS version, etc.
+}
+function releaseWakeLock(){
+  if(wakeLockSentinel){
+    wakeLockSentinel.release().catch(()=>{});
+    wakeLockSentinel = null;
+  }
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible' && timerState && !wakeLockSentinel){
+    requestWakeLock();
+  }
+});
+
 /* ============ TIMER ENGINE ============ */
-let timerState = null; // { kind, index, item, phaseIdx, remaining, running, intervalId }
+let timerState = null; // { kind, index, item, phaseIdx, remaining, running, intervalId, lastTickSecond }
 const overlay = document.getElementById('overlay');
 const panel = document.getElementById('timerPanel');
 
 function runMovement(kind, index){
-  const item = kind === 'morning' ? MORNING[index] : DESK[index];
-  timerState = { kind, index, item, phaseIdx:0, remaining:item.phases[0].sec, running:true };
+  const item = kind === 'morning' ? MORNING[index] : kind === 'night' ? NIGHT[index] : DESK[index];
+  timerState = { kind, index, item, phaseIdx:0, remaining:item.phases[0].sec, running:true, lastTickSecond:null };
+  ensureAudioCtx(); // unlock audio on this user gesture
+  requestWakeLock();
   openOverlay();
   renderTimerPanel();
   tick(); // immediate paint
@@ -726,6 +843,11 @@ function startInterval(){
   timerState.intervalId = setInterval(()=>{
     if(!timerState.running) return;
     timerState.remaining -= 0.1;
+    const secLeft = Math.ceil(timerState.remaining);
+    if(secLeft <= 3 && secLeft >= 1 && timerState.lastTickSecond !== secLeft){
+      timerState.lastTickSecond = secLeft;
+      playCountdownTick();
+    }
     if(timerState.remaining <= 0){
       nextPhase();
     } else {
@@ -737,8 +859,10 @@ function startInterval(){
 function nextPhase(){
   const item = timerState.item;
   if(timerState.phaseIdx < item.phases.length - 1){
+    playPhaseChime();
     timerState.phaseIdx++;
     timerState.remaining = item.phases[timerState.phaseIdx].sec;
+    timerState.lastTickSecond = null;
     renderTimerPanel();
   } else {
     clearInterval(timerState.intervalId);
@@ -758,6 +882,7 @@ function togglePause(){
 function cancelTimer(){
   clearInterval(timerState?.intervalId);
   timerState = null;
+  releaseWakeLock();
   closeOverlay();
 }
 
@@ -769,7 +894,7 @@ function renderTimerPanel(){
   const phase = item.phases[timerState.phaseIdx];
   const circumference = 2*Math.PI*118; // r=118 scaled via viewbox 260 -> using r ~ (260/2 - 12)=118? we use r matching svg below
   panel.innerHTML = `
-    <div class="timer-eyebrow mono">${timerState.kind === 'morning' ? 'MORNING · STEP '+(timerState.index+1)+'/4' : 'DESK RESET · OPTION '+item.letter}</div>
+    <div class="timer-eyebrow mono">${timerState.kind === 'morning' ? 'MORNING · STEP '+(timerState.index+1)+'/4' : timerState.kind === 'night' ? 'NIGHT · STEP '+(timerState.index+1)+'/'+NIGHT.length : 'DESK RESET · OPTION '+item.letter}</div>
     <div class="timer-title disp">${item.name}</div>
     <div class="timer-ring">
       <svg viewBox="0 0 260 260">
@@ -821,6 +946,7 @@ function completeMovement(){
   const { kind, index, item } = timerState;
   const rec = today();
   let newlyUnlocked = [];
+  playCompleteChime();
 
   if(kind === 'morning'){
     rec.morningSteps[index] = true;
@@ -828,6 +954,15 @@ function completeMovement(){
     state.totalCompletions++;
     if(rec.morningSteps.every(Boolean) && !rec.morningFullyDone){
       rec.morningFullyDone = true;
+      recomputeStreak();
+      checkFullSystem(rec);
+    }
+  } else if(kind === 'night'){
+    rec.nightSteps[index] = true;
+    state.xp += item.xp;
+    state.totalCompletions++;
+    if(rec.nightSteps.every(Boolean) && !rec.nightFullyDone){
+      rec.nightFullyDone = true;
       recomputeStreak();
       checkFullSystem(rec);
     }
@@ -845,15 +980,16 @@ function completeMovement(){
 }
 
 function showCompletion(item, kind, newlyUnlocked){
+  const titleText = kind==='morning' ? 'Segment Locked In' : kind==='night' ? 'Wind-Down Logged' : 'Reset Complete';
   panel.innerHTML = `
     <div class="complete-panel">
       <div class="complete-icon">✦</div>
-      <div class="complete-title disp">${kind==='morning' ? 'Segment Locked In' : 'Reset Complete'}</div>
+      <div class="complete-title disp">${titleText}</div>
       <div class="complete-sub">${item.name}</div>
       <div class="xp-toast mono">+ ${item.xp} XP</div>
       ${newlyUnlocked.length ? `
         <div class="badge-unlock-row">
-          ${newlyUnlocked.map(b=>`<div class="badge-unlock"><div class="badge-icon">${b.icon}</div><div class="badge-label mono">${b.label}</div></div>`).join('')}
+          ${newlyUnlocked.map(b=>`<div class="badge-unlock"><div class="badge-icon mono">${b.days}</div><div class="badge-label mono">${b.label}</div></div>`).join('')}
         </div>
       ` : ''}
       <div class="timer-controls" style="margin-top:6px;">
@@ -863,6 +999,7 @@ function showCompletion(item, kind, newlyUnlocked){
   `;
   document.getElementById('btnDone').onclick = ()=>{
     timerState = null;
+    releaseWakeLock();
     closeOverlay();
     render();
   };
