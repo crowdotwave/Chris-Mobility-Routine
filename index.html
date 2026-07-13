@@ -253,15 +253,14 @@
   .cstat-l{ font-size:7.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
 
   .heatmap-wrap{ overflow-x:auto; padding:2px 2px 6px; }
-  .heatmap-months{
-    display:grid; grid-auto-flow:column; gap:4px; margin-bottom:6px;
+  .heatmap-chart{
+    display:grid; gap:4px; width:max-content;
+  }
+  .hc-label{
     font-size:9px; color:var(--text-faint); letter-spacing:.5px; white-space:nowrap;
+    font-family:'JetBrains Mono',monospace; align-self:end; padding-bottom:2px;
   }
-  .heatmap-grid{
-    display:grid; grid-auto-flow:column; grid-template-rows:repeat(7, 14px);
-    gap:4px; width:max-content;
-  }
-  .hc{ width:14px; height:14px; border-radius:4px; background:var(--elevated-hi); border:1px solid var(--border); transition:transform .12s ease; }
+  .hc{ width:17px; height:17px; border-radius:4px; background:var(--elevated-hi); border:1px solid var(--border); transition:transform .12s ease; }
   .hc:hover{ transform:scale(1.25); }
   /* single category */
   .hc-m{ background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 6px 0 rgba(0,229,255,0.5); }
@@ -322,10 +321,14 @@
   .complete-title{ font-family:'Chakra Petch',sans-serif; font-size:22px; font-weight:700; margin-bottom:8px;
     background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .complete-sub{ color:var(--text-dim); font-size:13px; margin-bottom:22px; }
+  .xp-toast-group{ display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:22px; }
   .xp-toast{
     display:inline-flex; align-items:center; gap:6px; background:var(--elevated); border:1px solid var(--border-hi);
     padding:8px 16px; border-radius:24px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--cyan);
-    margin-bottom:22px;
+  }
+  .xp-toast.xp-bonus{
+    color:var(--amber); border-color:var(--amber); font-size:11.5px;
+    box-shadow:0 0 14px -4px rgba(255,176,32,0.5);
   }
   .badge-unlock-row{ display:flex; justify-content:center; gap:10px; margin-bottom:22px; flex-wrap:wrap; }
   .badge-unlock{
@@ -406,8 +409,7 @@
       </div>
     </div>
     <div class="heatmap-wrap">
-      <div class="heatmap-months mono" id="heatmapMonths"></div>
-      <div class="heatmap-grid" id="heatmapGrid"></div>
+      <div class="heatmap-chart" id="heatmapChart"></div>
     </div>
     <div class="heatmap-legend mono">
       <span class="hl-item"><span class="hl-swatch hl-none"></span>None</span>
@@ -461,24 +463,28 @@
 
 <script>
 /* ============ DATA ============ */
+/* XP FORMULA — transparent and consistent across every movement:
+   passive / positional holds  = 0.2 xp per second  (1 xp per 5s)
+   active / isometric holds    = 0.333 xp per second (1 xp per 3s) — genuinely harder per second than passive stretching
+   Each item's xp = sum across its phases at the appropriate rate, rounded. */
 const MORNING = [
   { id:'m1', name:"Bed Child's Pose → Cobra Flow", sub:"Cycles the spine through decompression and gentle extension to flush the discs.", xp:12, phases:[{label:"Hold",sec:60}] },
   { id:'m2', name:"90/90 Hip Switches + Forward Hinge", sub:"Hinge over the front shin to clear the glutes, sit tall to force internal rotation.", xp:12, phases:[{label:"Both Sides",sec:60}] },
-  { id:'m3', name:"World's Greatest Stretch + Hamstring Floss", sub:"Deep lunge, elbow to instep, thoracic twist — then rock hips back to floss the sciatic track.", xp:16, phases:[{label:"Left",sec:60},{label:"Right",sec:60}] },
+  { id:'m3', name:"World's Greatest Stretch + Hamstring Floss", sub:"Deep lunge, elbow to instep, thoracic twist — then rock hips back to floss the sciatic track.", xp:24, phases:[{label:"Left",sec:60},{label:"Right",sec:60}] },
   { id:'m4', name:"Resting Deep Paleo Squat", sub:"Sit deep and breathe, letting the rotated hips settle into a neutral baseline.", xp:12, phases:[{label:"Hold",sec:60}] },
 ];
 
 const NIGHT = [
-  { id:'n1', name:"Supine Spinal Twist", sub:"Rotational release for the lumbar/thoracic spine, fully relaxed and unweighted.", xp:12, phases:[{label:"Left",sec:45},{label:"Right",sec:45}] },
-  { id:'n2', name:"Figure-4 Stretch", sub:"Deep glute/piriformis release lying down, long low-intensity hold.", xp:14, phases:[{label:"Left",sec:60},{label:"Right",sec:60}] },
+  { id:'n1', name:"Supine Spinal Twist", sub:"Rotational release for the lumbar/thoracic spine, fully relaxed and unweighted.", xp:18, phases:[{label:"Left",sec:45},{label:"Right",sec:45}] },
+  { id:'n2', name:"Figure-4 Stretch", sub:"Deep glute/piriformis release lying down, long low-intensity hold.", xp:24, phases:[{label:"Left",sec:60},{label:"Right",sec:60}] },
 ];
 
 const DESK = [
-  { id:'dA', letter:'A', name:'Neurological Shock', desc:'Horse Stance → RKC Plank', xp:14,
-    phases:[{label:"Horse Stance",sec:30},{label:"RKC Plank",sec:15}] },
-  { id:'dB', letter:'B', name:'Mechanical Pulley', desc:'Couch Stretch → Elephant Walk', xp:16,
+  { id:'dA', letter:'A', name:'Neurological Shock', desc:'Horse Stance → RKC Plank → Reverse Plank', xp:20,
+    phases:[{label:"Horse Stance",sec:30},{label:"RKC Plank",sec:15},{label:"Reverse Plank",sec:15}] },
+  { id:'dB', letter:'B', name:'Mechanical Pulley', desc:'Couch Stretch → Elephant Walk', xp:32,
     phases:[{label:"Couch — Left",sec:30},{label:"Couch — Right",sec:30},{label:"Elephant Walk",sec:60}] },
-  { id:'dC', letter:'C', name:'Upper Reset', desc:'Wall Slides → Pec/Thread-the-Needle → Exhale', xp:14,
+  { id:'dC', letter:'C', name:'Upper Reset', desc:'Wall Slides → Pec/Thread-the-Needle → Exhale', xp:22,
     phases:[{label:"Wall Slides",sec:40},{label:"Pec Stretch — L/R",sec:30},{label:"Exhale Reset",sec:15}] },
 ];
 
@@ -558,7 +564,9 @@ function checkFullSystem(rec){
   if(rec.morningFullyDone && rec.nightFullyDone && rec.deskCount > 0 && !rec.fullSystemCounted){
     rec.fullSystemCounted = true;
     state.fullSystemDays++;
+    return true;
   }
+  return false;
 }
 
 function checkBadges(){
@@ -702,11 +710,9 @@ function render(){
 const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function buildHeatmap(){
-  const grid = document.getElementById('heatmapGrid');
-  const monthsRow = document.getElementById('heatmapMonths');
-  if(!grid) return;
-  grid.innerHTML = '';
-  monthsRow.innerHTML = '';
+  const chart = document.getElementById('heatmapChart');
+  if(!chart) return;
+  chart.innerHTML = '';
 
   const totalDays = 91; // ~13 weeks
   const now = new Date();
@@ -716,34 +722,49 @@ function buildHeatmap(){
   start.setDate(start.getDate() - start.getDay()); // snap back to Sunday
 
   const numWeeks = Math.ceil(((now - start) / 86400000 + 1) / 7);
-  grid.style.gridTemplateColumns = `repeat(${numWeeks}, 14px)`;
-  monthsRow.style.gridTemplateColumns = `repeat(${numWeeks}, 14px)`;
+  chart.style.gridTemplateColumns = `repeat(${numWeeks}, 17px)`;
+  chart.style.gridTemplateRows = `12px repeat(7, 17px)`;
 
-  let activeDays = 0;
-  let cur = new Date(start);
-  let prevMonth = null;
-
+  // month labels: place a label in whichever column actually contains the 1st of that month
   for(let w = 0; w < numWeeks; w++){
     const weekStart = new Date(start);
     weekStart.setDate(start.getDate() + w*7);
-    const m = weekStart.getMonth();
-    const label = document.createElement('div');
-    if(m !== prevMonth){
-      label.textContent = MONTH_ABBR[m];
-      prevMonth = m;
+    let label = '';
+    for(let i = 0; i < 7; i++){
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      if(d.getDate() === 1){ label = MONTH_ABBR[d.getMonth()]; break; }
     }
-    monthsRow.appendChild(label);
+    if(w === 0 && !label) label = MONTH_ABBR[weekStart.getMonth()];
+    if(label){
+      const labelEl = document.createElement('div');
+      labelEl.className = 'hc-label';
+      labelEl.textContent = label;
+      labelEl.style.gridColumn = String(w + 1);
+      labelEl.style.gridRow = '1';
+      chart.appendChild(labelEl);
+    }
   }
 
+  // day cells: position explicitly by actual date offset, not DOM order
+  let activeDays = 0;
+  let cur = new Date(start);
   while(cur <= now){
     const key = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
     const rec = state.history[key];
     const { cls, label } = classifyDay(rec);
     if(cls !== 'hc-none') activeDays++;
+
+    const dayOffset = Math.round((cur - start) / 86400000);
+    const col = Math.floor(dayOffset / 7) + 1;
+    const row = (dayOffset % 7) + 2;
+
     const cell = document.createElement('div');
     cell.className = 'hc ' + cls;
     cell.title = key + ' — ' + label;
-    grid.appendChild(cell);
+    cell.style.gridColumn = String(col);
+    cell.style.gridRow = String(row);
+    chart.appendChild(cell);
     cur.setDate(cur.getDate()+1);
   }
 
@@ -946,6 +967,7 @@ function completeMovement(){
   const { kind, index, item } = timerState;
   const rec = today();
   let newlyUnlocked = [];
+  let bonuses = [];
   playCompleteChime();
 
   if(kind === 'morning'){
@@ -954,8 +976,13 @@ function completeMovement(){
     state.totalCompletions++;
     if(rec.morningSteps.every(Boolean) && !rec.morningFullyDone){
       rec.morningFullyDone = true;
+      state.xp += 10;
+      bonuses.push({ amount:10, label:'Morning Complete' });
       recomputeStreak();
-      checkFullSystem(rec);
+      if(checkFullSystem(rec)){
+        state.xp += 15;
+        bonuses.push({ amount:15, label:'Full System Day' });
+      }
     }
   } else if(kind === 'night'){
     rec.nightSteps[index] = true;
@@ -963,30 +990,41 @@ function completeMovement(){
     state.totalCompletions++;
     if(rec.nightSteps.every(Boolean) && !rec.nightFullyDone){
       rec.nightFullyDone = true;
+      state.xp += 8;
+      bonuses.push({ amount:8, label:'Night Complete' });
       recomputeStreak();
-      checkFullSystem(rec);
+      if(checkFullSystem(rec)){
+        state.xp += 15;
+        bonuses.push({ amount:15, label:'Full System Day' });
+      }
     }
   } else {
     rec.deskCount++;
     rec.deskOptions.push(item.id);
     state.xp += item.xp;
     state.totalDeskResets++;
-    checkFullSystem(rec);
+    if(checkFullSystem(rec)){
+      state.xp += 15;
+      bonuses.push({ amount:15, label:'Full System Day' });
+    }
   }
 
   newlyUnlocked = checkBadges();
   save();
-  showCompletion(item, kind, newlyUnlocked);
+  showCompletion(item, kind, newlyUnlocked, bonuses);
 }
 
-function showCompletion(item, kind, newlyUnlocked){
+function showCompletion(item, kind, newlyUnlocked, bonuses){
   const titleText = kind==='morning' ? 'Segment Locked In' : kind==='night' ? 'Wind-Down Logged' : 'Reset Complete';
   panel.innerHTML = `
     <div class="complete-panel">
       <div class="complete-icon">✦</div>
       <div class="complete-title disp">${titleText}</div>
       <div class="complete-sub">${item.name}</div>
-      <div class="xp-toast mono">+ ${item.xp} XP</div>
+      <div class="xp-toast-group">
+        <div class="xp-toast mono">+ ${item.xp} XP</div>
+        ${bonuses.map(b=>`<div class="xp-toast xp-bonus mono">+ ${b.amount} XP · ${b.label.toUpperCase()}</div>`).join('')}
+      </div>
       ${newlyUnlocked.length ? `
         <div class="badge-unlock-row">
           ${newlyUnlocked.map(b=>`<div class="badge-unlock"><div class="badge-icon mono">${b.days}</div><div class="badge-label mono">${b.label}</div></div>`).join('')}
