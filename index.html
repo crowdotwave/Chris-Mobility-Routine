@@ -746,14 +746,24 @@ function buildHeatmap(){
     }
   }
 
-  // day cells: position explicitly by actual date offset, not DOM order
+  // day cells: position explicitly by actual date offset, not DOM order.
+  // Always render the full rectangle (numWeeks × 7) — future days in the current week
+  // are styled the same as "no activity" so the grid never has a jagged trailing edge.
   let activeDays = 0;
   let cur = new Date(start);
-  while(cur <= now){
+  const gridEnd = new Date(start);
+  gridEnd.setDate(gridEnd.getDate() + numWeeks*7 - 1);
+  while(cur <= gridEnd){
     const key = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
-    const rec = state.history[key];
-    const { cls, label } = classifyDay(rec);
-    if(cls !== 'hc-none') activeDays++;
+    let cls, label;
+    if(cur > now){
+      cls = 'hc-none';
+      label = 'upcoming';
+    } else {
+      const rec = state.history[key];
+      ({ cls, label } = classifyDay(rec));
+      if(cls !== 'hc-none') activeDays++;
+    }
 
     const dayOffset = Math.round((cur - start) / 86400000);
     const col = Math.floor(dayOffset / 7) + 1;
