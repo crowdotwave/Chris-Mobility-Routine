@@ -227,6 +227,34 @@
   .badge.unlocked.t4 .badge-days{ background:linear-gradient(120deg,var(--amber),var(--magenta)); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .badge.unlocked.t4 .badge-label{ color:var(--amber); }
 
+  /* ---------- boss panel ---------- */
+  .boss-panel{
+    position:relative;
+    background:linear-gradient(180deg, var(--elevated) 0%, var(--surface) 100%);
+    border:1px solid var(--border-hi);
+    border-radius:14px;
+    padding:18px 18px 16px;
+    margin-bottom:26px;
+    box-shadow:0 0 44px -22px rgba(255,46,196,0.4), 0 0 0 1px rgba(255,255,255,0.02) inset;
+  }
+  .boss-panel::before, .boss-panel::after{ content:''; position:absolute; width:18px; height:18px; }
+  .boss-panel::before{ top:-1px; left:-1px; border-top:2px solid var(--magenta); border-left:2px solid var(--magenta); border-radius:8px 0 0 0; }
+  .boss-panel::after{ bottom:-1px; right:-1px; border-bottom:2px solid var(--cyan); border-right:2px solid var(--cyan); border-radius:0 0 8px 0; }
+  .boss-eyebrow{ font-size:9.5px; letter-spacing:2px; color:var(--magenta); text-transform:uppercase; }
+  .boss-creature{
+    width:104px; height:104px; margin:6px auto 4px; display:block;
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,0.35));
+  }
+  .boss-creature svg{ width:100%; height:100%; display:block; }
+  .boss-name{ font-size:19px; font-weight:700; margin:2px 0 14px; text-align:center; }
+  .boss-hp-track{
+    width:100%; height:14px; border-radius:8px; background:var(--elevated-hi);
+    border:1px solid var(--border); overflow:hidden;
+  }
+  .boss-hp-fill{ height:100%; background:var(--grad); transition:width .4s ease; box-shadow:0 0 10px 0 rgba(157,92,255,0.5); }
+  .boss-hp-row{ display:flex; justify-content:center; align-items:center; margin-top:8px; }
+  .boss-hp-text{ font-size:11px; color:var(--text); font-weight:600; }
+
   /* ---------- consistency chart panel (highlighted) ---------- */
   .chart-panel{
     position:relative;
@@ -330,6 +358,18 @@
     color:var(--amber); border-color:var(--amber); font-size:11.5px;
     box-shadow:0 0 14px -4px rgba(255,176,32,0.5);
   }
+  .boss-defeat-banner{
+    background:linear-gradient(120deg, rgba(0,229,255,.15), rgba(157,92,255,.15), rgba(255,46,196,.15));
+    border:1px solid var(--magenta); border-radius:12px; padding:14px; margin-bottom:18px;
+    box-shadow:0 0 24px -6px rgba(255,46,196,.6);
+  }
+  .boss-defeat-title{
+    font-weight:700; font-size:15px; margin-bottom:4px;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .boss-defeat-next-creature{ width:56px; height:56px; margin:8px auto 4px; }
+  .boss-defeat-next-creature svg{ width:100%; height:100%; display:block; }
+  .boss-defeat-sub{ font-size:10.5px; color:var(--text-dim); }
   .badge-unlock-row{ display:flex; justify-content:center; gap:10px; margin-bottom:22px; flex-wrap:wrap; }
   .badge-unlock{
     display:flex; flex-direction:column; align-items:center; gap:4px; background:var(--elevated);
@@ -389,6 +429,20 @@
       </div>
     </div>
     <button class="cta disp" id="heroCta">Start Morning Sequence</button>
+  </div>
+
+  <div class="boss-panel">
+    <div class="boss-head">
+      <div class="boss-eyebrow mono">CURRENT BOSS <span id="bossIndexLabel">#1</span></div>
+    </div>
+    <div class="boss-creature" id="bossCreature"></div>
+    <div class="boss-name disp" id="bossName">Blip</div>
+    <div class="boss-hp-track">
+      <div class="boss-hp-fill" id="bossHpFill" style="width:100%"></div>
+    </div>
+    <div class="boss-hp-row">
+      <span class="boss-hp-text mono" id="bossHpText">250 / 250 HP</span>
+    </div>
   </div>
 
   <div class="chart-panel">
@@ -501,6 +555,116 @@ const BADGES = [
   { id:'d365', days:365, label:'1 Year',   tier:4 },
 ];
 
+/* ============ BOSS LADDER ============
+   Every XP you earn is dealt as damage to the current boss.
+   Defeating one advances to the next, permanently. Past the named list,
+   bosses keep generating procedurally (scaling HP) — no final boss. */
+const BOSSES = [
+  { name:"Blip", hp:250 },
+  { name:"Glim", hp:450 },
+  { name:"Puffle", hp:700 },
+  { name:"Sable", hp:950 },
+  { name:"Wisp", hp:1300 },
+  { name:"Ember", hp:1700 },
+  { name:"Celeste", hp:2200 },
+];
+const BOSS_NAME_PREFIXES = ['Radiant','Ancient','Astral','Prismatic','Lunar','Glacial','Verdant','Molten'];
+function getBoss(index){
+  if(index < BOSSES.length) return BOSSES[index];
+  const scale = index - (BOSSES.length - 1);
+  const last = BOSSES[BOSSES.length - 1];
+  const name = BOSS_NAME_PREFIXES[(scale - 1) % BOSS_NAME_PREFIXES.length] + ' Slime';
+  return { name, hp: Math.round(last.hp * Math.pow(1.35, scale)) };
+}
+function tierForIndex(i){ return Math.min(4, Math.floor(i / 2) + 1); }
+
+/* simple hand-drawn slime creature — pure SVG, no images. Visual complexity
+   escalates with tier: plain -> antenna -> wings+sparkles -> crown. */
+let creatureUidCounter = 0;
+function renderCreatureSVG(tier, size){
+  tier = Math.min(tier, 4);
+  const uid = 'c' + (creatureUidCounter++);
+  const gid = 'creatureGrad' + uid;
+  const stopSets = {
+    1: ['#00e5ff','#6fefff'],
+    2: ['#00e5ff','#9d5cff'],
+    3: ['#9d5cff','#ff2ec4'],
+    4: ['#00e5ff','#9d5cff','#ff2ec4'],
+  };
+  const stops = stopSets[tier];
+  const stopsMarkup = stops.length === 2
+    ? `<stop offset="0%" stop-color="${stops[0]}"/><stop offset="100%" stop-color="${stops[1]}"/>`
+    : `<stop offset="0%" stop-color="${stops[0]}"/><stop offset="50%" stop-color="${stops[1]}"/><stop offset="100%" stop-color="${stops[2]}"/>`;
+
+  let accessories = '';
+  if(tier >= 4){
+    accessories += `<polygon points="32,24 38,9 44,21 50,7 56,21 62,9 68,24" fill="#ffb020" stroke="#0a0b10" stroke-width="1"/>`;
+  }
+  if(tier >= 3){
+    accessories += `
+      <path d="M16,26 L18,31 L23,33 L18,35 L16,40 L14,35 L9,33 L14,31 Z" fill="#00e5ff"/>
+      <path d="M85,30 L86.6,33.6 L90,35 L86.6,36.4 L85,40 L83.4,36.4 L80,35 L83.4,33.6 Z" fill="#ff2ec4"/>
+      <ellipse cx="16" cy="58" rx="9" ry="5.5" fill="url(#${gid})" opacity="0.85" transform="rotate(-20 16 58)"/>
+      <ellipse cx="84" cy="58" rx="9" ry="5.5" fill="url(#${gid})" opacity="0.85" transform="rotate(20 84 58)"/>
+    `;
+  }
+  if(tier >= 2){
+    accessories += `
+      <line x1="50" y1="32" x2="44" y2="17" stroke="url(#${gid})" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="44" cy="15" r="3.4" fill="url(#${gid})"/>
+    `;
+  }
+
+  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}">
+    <defs><linearGradient id="${gid}" x1="0%" y1="0%" x2="100%" y2="100%">${stopsMarkup}</linearGradient></defs>
+    ${accessories}
+    <ellipse cx="50" cy="60" rx="34" ry="28" fill="url(#${gid})"/>
+    <ellipse cx="38" cy="48" rx="9" ry="6" fill="#ffffff" opacity="0.25"/>
+    <circle cx="38" cy="58" r="6" fill="#0a0b10"/>
+    <circle cx="62" cy="58" r="6" fill="#0a0b10"/>
+    <circle cx="40" cy="56" r="1.6" fill="#ffffff"/>
+    <circle cx="64" cy="56" r="1.6" fill="#ffffff"/>
+    <path d="M42,70 Q50,76 58,70" stroke="#0a0b10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+/* deals `amount` damage to the current boss, advancing through as many kills
+   as the hit covers; returns an array of every boss defeated by this action */
+function dealBossDamage(amount){
+  let dmg = amount;
+  const defeated = [];
+  while(dmg > 0){
+    if(dmg >= state.bossHP){
+      dmg -= state.bossHP;
+      defeated.push(getBoss(state.bossIndex));
+      state.bossIndex++;
+      state.bossHP = getBoss(state.bossIndex).hp;
+    } else {
+      state.bossHP -= dmg;
+      dmg = 0;
+    }
+  }
+  return defeated;
+}
+/* if the most recent past day had zero activity across morning/night/desk,
+   the current boss regenerates a small slice of its max HP — checked once per day */
+function checkBossRegen(){
+  const t = todayStr();
+  if(state.lastRegenCheckedDate === t) return;
+  state.lastRegenCheckedDate = t;
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  const yKey = y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');
+  const yRec = state.history[yKey];
+  if(yRec){
+    const activity = yRec.morningSteps.filter(Boolean).length + yRec.nightSteps.filter(Boolean).length + yRec.deskCount;
+    if(activity === 0){
+      const boss = getBoss(state.bossIndex);
+      const regen = Math.round(boss.hp * 0.04);
+      state.bossHP = Math.min(boss.hp, state.bossHP + regen);
+    }
+  }
+}
+
 /* ============ STATE ============ */
 const STORAGE_KEY = 'anchor_state_v1';
 function todayStr(){
@@ -516,7 +680,10 @@ function defaultState(){
     totalDeskResets:0,
     fullSystemDays:0,
     unlockedBadges:[],
-    history:{}, // date -> {morningSteps:[bool,bool,bool,bool], deskCount:0, deskOptions:[], morningFullyDone:bool, fullSystemCounted:bool}
+    bossIndex:0,
+    bossHP:BOSSES[0].hp,
+    lastRegenCheckedDate:null,
+    history:{}, // date -> {morningSteps:[bool x5], nightSteps:[bool,bool], deskCount:0, deskOptions:[], morningFullyDone:bool, nightFullyDone:bool, fullSystemCounted:bool}
   };
 }
 let state = load();
@@ -585,6 +752,16 @@ function checkBadges(){
 /* ============ RENDER ============ */
 function level(xp){ return Math.floor(xp/150)+1; }
 
+function renderBossPanel(){
+  const boss = getBoss(state.bossIndex);
+  const pct = Math.max(0, Math.min(100, (state.bossHP / boss.hp) * 100));
+  document.getElementById('bossIndexLabel').textContent = '#' + (state.bossIndex + 1);
+  document.getElementById('bossName').textContent = boss.name;
+  document.getElementById('bossCreature').innerHTML = renderCreatureSVG(tierForIndex(state.bossIndex), 104);
+  document.getElementById('bossHpFill').style.width = pct + '%';
+  document.getElementById('bossHpText').textContent = Math.max(0, Math.round(state.bossHP)) + ' / ' + boss.hp + ' HP';
+}
+
 function renderSequenceCards(containerId, data, doneArr, kind){
   const container = document.getElementById(containerId);
   container.innerHTML = '';
@@ -625,6 +802,7 @@ function render(){
   document.getElementById('statStreak').textContent = state.streak;
   document.getElementById('statXP').textContent = state.xp;
   document.getElementById('statLevel').textContent = level(state.xp);
+  renderBossPanel();
 
   const doneCount = rec.morningSteps.filter(Boolean).length;
   document.getElementById('heroDone').textContent = doneCount;
@@ -1023,11 +1201,13 @@ function completeMovement(){
   }
 
   newlyUnlocked = checkBadges();
+  const totalXpThisAction = item.xp + bonuses.reduce((s,b)=>s+b.amount, 0);
+  const defeatedBosses = dealBossDamage(totalXpThisAction);
   save();
-  showCompletion(item, kind, newlyUnlocked, bonuses);
+  showCompletion(item, kind, newlyUnlocked, bonuses, defeatedBosses);
 }
 
-function showCompletion(item, kind, newlyUnlocked, bonuses){
+function showCompletion(item, kind, newlyUnlocked, bonuses, defeatedBosses){
   const titleText = kind==='morning' ? 'Segment Locked In' : kind==='night' ? 'Wind-Down Logged' : 'Reset Complete';
   panel.innerHTML = `
     <div class="complete-panel">
@@ -1038,6 +1218,13 @@ function showCompletion(item, kind, newlyUnlocked, bonuses){
         <div class="xp-toast mono">+ ${item.xp} XP</div>
         ${bonuses.map(b=>`<div class="xp-toast xp-bonus mono">+ ${b.amount} XP · ${b.label.toUpperCase()}</div>`).join('')}
       </div>
+      ${defeatedBosses.length ? `
+        <div class="boss-defeat-banner">
+          ${defeatedBosses.map(b=>`<div class="boss-defeat-title disp">${b.name} Defeated</div>`).join('')}
+          <div class="boss-defeat-next-creature">${renderCreatureSVG(tierForIndex(state.bossIndex), 56)}</div>
+          <div class="boss-defeat-sub mono">Next: ${getBoss(state.bossIndex).name}</div>
+        </div>
+      ` : ''}
       ${newlyUnlocked.length ? `
         <div class="badge-unlock-row">
           ${newlyUnlocked.map(b=>`<div class="badge-unlock"><div class="badge-icon mono">${b.days}</div><div class="badge-label mono">${b.label}</div></div>`).join('')}
@@ -1060,6 +1247,7 @@ function showCompletion(item, kind, newlyUnlocked, bonuses){
 today();
 recomputeStreak();
 checkBadges();
+checkBossRegen();
 render();
 </script>
 </body>
