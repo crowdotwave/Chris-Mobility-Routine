@@ -384,7 +384,7 @@
         <circle class="ring-fg" id="heroRing" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="565.48"/>
       </svg>
       <div class="ring-center">
-        <div class="n mono"><span id="heroDone">0</span><span>/4</span></div>
+        <div class="n mono"><span id="heroDone">0</span><span>/<span id="heroTotal">5</span></span></div>
         <div class="l">morning set</div>
       </div>
     </div>
@@ -472,6 +472,7 @@ const MORNING = [
   { id:'m2', name:"90/90 Hip Switches + Forward Hinge", sub:"Hinge over the front shin to clear the glutes, sit tall to force internal rotation.", xp:12, phases:[{label:"Both Sides",sec:60}] },
   { id:'m3', name:"World's Greatest Stretch + Hamstring Floss", sub:"Deep lunge, elbow to instep, thoracic twist — then rock hips back to floss the sciatic track.", xp:24, phases:[{label:"Left",sec:60},{label:"Right",sec:60}] },
   { id:'m4', name:"Resting Deep Paleo Squat", sub:"Sit deep and breathe, letting the rotated hips settle into a neutral baseline.", xp:12, phases:[{label:"Hold",sec:60}] },
+  { id:'m5', name:"Shoulder CARs", sub:"Slow controlled circle through the shoulder's full rotational range — active, not a loose swing.", xp:20, phases:[{label:"Left Arm",sec:30},{label:"Right Arm",sec:30}] },
 ];
 
 const NIGHT = [
@@ -533,12 +534,13 @@ function save(){
 function today(){
   const t = todayStr();
   if(!state.history[t]){
-    state.history[t] = { morningSteps:[false,false,false,false], nightSteps:[false,false], deskCount:0, deskOptions:[], morningFullyDone:false, nightFullyDone:false, fullSystemCounted:false };
+    state.history[t] = { morningSteps:[false,false,false,false,false], nightSteps:[false,false], deskCount:0, deskOptions:[], morningFullyDone:false, nightFullyDone:false, fullSystemCounted:false };
   }
-  // migrate older saved records that predate the night sequence
+  // migrate older saved records that predate the night sequence / 5th morning step
   const rec = state.history[t];
   if(!rec.nightSteps) rec.nightSteps = [false,false];
   if(typeof rec.nightFullyDone === 'undefined') rec.nightFullyDone = false;
+  while(rec.morningSteps.length < MORNING.length) rec.morningSteps.push(false);
   return rec;
 }
 
@@ -626,8 +628,9 @@ function render(){
 
   const doneCount = rec.morningSteps.filter(Boolean).length;
   document.getElementById('heroDone').textContent = doneCount;
+  document.getElementById('heroTotal').textContent = MORNING.length;
   const circumference = 565.48;
-  const offset = circumference - (doneCount/4)*circumference;
+  const offset = circumference - (doneCount/MORNING.length)*circumference;
   document.getElementById('heroRing').style.strokeDashoffset = offset;
 
   const cta = document.getElementById('heroCta');
@@ -925,7 +928,7 @@ function renderTimerPanel(){
   const phase = item.phases[timerState.phaseIdx];
   const circumference = 2*Math.PI*118; // r=118 scaled via viewbox 260 -> using r ~ (260/2 - 12)=118? we use r matching svg below
   panel.innerHTML = `
-    <div class="timer-eyebrow mono">${timerState.kind === 'morning' ? 'MORNING · STEP '+(timerState.index+1)+'/4' : timerState.kind === 'night' ? 'NIGHT · STEP '+(timerState.index+1)+'/'+NIGHT.length : 'DESK RESET · OPTION '+item.letter}</div>
+    <div class="timer-eyebrow mono">${timerState.kind === 'morning' ? 'MORNING · STEP '+(timerState.index+1)+'/'+MORNING.length : timerState.kind === 'night' ? 'NIGHT · STEP '+(timerState.index+1)+'/'+NIGHT.length : 'DESK RESET · OPTION '+item.letter}</div>
     <div class="timer-title disp">${item.name}</div>
     <div class="timer-ring">
       <svg viewBox="0 0 260 260">
