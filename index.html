@@ -82,6 +82,31 @@
   .v.streak{ color:var(--amber); }
   .v.xp{ color:var(--cyan); }
 
+  .topbar-right{ display:flex; align-items:center; gap:14px; }
+  .boss-chip{
+    position:relative; width:36px; height:36px; border-radius:50%;
+    background:var(--elevated); border:1.5px solid var(--magenta);
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 10px -2px rgba(255,46,196,0.5);
+    flex-shrink:0;
+  }
+  .boss-chip:active{ transform:scale(0.92); }
+  .boss-chip-creature{ width:26px; height:26px; }
+  .boss-chip-creature svg{ width:100%; height:100%; display:block; }
+  .boss-chip-hp-track{
+    position:absolute; bottom:-5px; left:2px; right:2px; height:3px;
+    border-radius:2px; background:var(--elevated-hi); overflow:hidden;
+  }
+  .boss-chip-hp-fill{ height:100%; background:var(--grad); transition:width .4s ease; }
+
+  .xp-bar-wrap{ padding:0 2px; margin:-8px 0 20px; }
+  .xp-bar-track{
+    width:100%; height:6px; border-radius:4px; background:var(--elevated-hi);
+    border:1px solid var(--border); overflow:hidden;
+  }
+  .xp-bar-fill{ height:100%; background:var(--grad); transition:width .4s ease; }
+  .xp-bar-label{ font-size:8.5px; color:var(--text-faint); letter-spacing:.5px; margin-top:5px; text-align:right; }
+
   /* ---------- hero ring ---------- */
   .hero{
     display:flex; flex-direction:column; align-items:center;
@@ -255,6 +280,24 @@
   .boss-hp-row{ display:flex; justify-content:center; align-items:center; margin-top:8px; }
   .boss-hp-text{ font-size:11px; color:var(--text); font-weight:600; }
 
+  .boss-attack-area{ margin-top:16px; text-align:center; }
+  .attack-btn{
+    border:none; cursor:pointer;
+    background:var(--grad); color:#05060a;
+    font-weight:700; font-size:12px; letter-spacing:.3px;
+    padding:9px 18px; border-radius:20px;
+    box-shadow:0 0 14px -6px rgba(255,46,196,0.5);
+    transition:transform .15s ease;
+  }
+  .attack-btn:active{ transform:scale(.96); }
+  .attack-count{ font-size:9.5px; color:var(--text-dim); margin-top:8px; letter-spacing:.5px; }
+  .attack-exhausted{
+    font-size:11px; color:var(--text-faint); letter-spacing:.5px;
+    padding:12px; background:var(--elevated-hi); border:1px solid var(--border); border-radius:12px;
+  }
+  .attack-warning{ font-size:11.5px; color:var(--amber); margin-bottom:10px; line-height:1.4; }
+  .attack-btn-row{ display:flex; gap:10px; justify-content:center; }
+
   /* ---------- consistency chart panel (highlighted) ---------- */
   .chart-panel{
     position:relative;
@@ -294,11 +337,11 @@
   .hc-m{ background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 6px 0 rgba(0,229,255,0.5); }
   .hc-n{ background:var(--purple); border-color:var(--purple); box-shadow:0 0 6px 0 rgba(157,92,255,0.5); }
   .hc-d{ background:var(--steel); border-color:var(--steel); }
-  /* two categories — hard half-split */
+  /* two categories: hard half-split */
   .hc-mn{ background:linear-gradient(90deg, var(--cyan) 0%, var(--cyan) 50%, var(--purple) 50%, var(--purple) 100%); border-color:var(--purple); box-shadow:0 0 6px 0 rgba(157,92,255,0.4); }
   .hc-md{ background:linear-gradient(90deg, var(--cyan) 0%, var(--cyan) 50%, var(--steel) 50%, var(--steel) 100%); border-color:var(--cyan); }
   .hc-nd{ background:linear-gradient(90deg, var(--purple) 0%, var(--purple) 50%, var(--steel) 50%, var(--steel) 100%); border-color:var(--purple); }
-  /* all three — full reward gradient */
+  /* all three: full reward gradient */
   .hc-full{ background:linear-gradient(135deg, var(--cyan), var(--purple) 50%, var(--magenta)); border-color:var(--magenta); box-shadow:0 0 9px 0 rgba(255,46,196,0.75); }
   .heatmap-legend{ display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; padding:0 2px; }
   .hl-item{ display:flex; align-items:center; gap:5px; font-size:9.5px; color:var(--text-dim); }
@@ -398,16 +441,23 @@
         <div class="brand-name">CHRIS' ANTI-CHAIR ROUTINE</div>
       </div>
     </div>
-    <div class="stat-cluster">
-      <div class="stat-pill">
-        <div class="v streak mono" id="statStreak">0</div>
-        <div class="l">streak</div>
+    <div class="topbar-right">
+      <div class="stat-cluster">
+        <div class="stat-pill">
+          <div class="v streak mono" id="statStreak">0</div>
+          <div class="l">streak</div>
+        </div>
       </div>
-      <div class="stat-pill">
-        <div class="v xp mono" id="statXP">0</div>
-        <div class="l">xp · lv <span id="statLevel">1</span></div>
+      <div class="boss-chip" id="bossChip" title="Tap to view boss">
+        <div class="boss-chip-creature" id="bossChipCreature"></div>
+        <div class="boss-chip-hp-track"><div class="boss-chip-hp-fill" id="bossChipHpFill"></div></div>
       </div>
     </div>
+  </div>
+
+  <div class="xp-bar-wrap">
+    <div class="xp-bar-track"><div class="xp-bar-fill" id="xpBarFill"></div></div>
+    <div class="xp-bar-label mono" id="xpBarLabel">0 / 150 XP to Level 2</div>
   </div>
 
   <div class="hero">
@@ -429,20 +479,6 @@
       </div>
     </div>
     <button class="cta disp" id="heroCta">Start Morning Sequence</button>
-  </div>
-
-  <div class="boss-panel">
-    <div class="boss-head">
-      <div class="boss-eyebrow mono">CURRENT BOSS <span id="bossIndexLabel">#1</span></div>
-    </div>
-    <div class="boss-creature" id="bossCreature"></div>
-    <div class="boss-name disp" id="bossName">Blip</div>
-    <div class="boss-hp-track">
-      <div class="boss-hp-fill" id="bossHpFill" style="width:100%"></div>
-    </div>
-    <div class="boss-hp-row">
-      <span class="boss-hp-text mono" id="bossHpText">250 / 250 HP</span>
-    </div>
   </div>
 
   <div class="chart-panel">
@@ -517,16 +553,16 @@
 
 <script>
 /* ============ DATA ============ */
-/* XP FORMULA — transparent and consistent across every movement:
+/* XP FORMULA: transparent and consistent across every movement:
    passive / positional holds  = 0.2 xp per second  (1 xp per 5s)
-   active / isometric holds    = 0.333 xp per second (1 xp per 3s) — genuinely harder per second than passive stretching
+   active / isometric holds    = 0.333 xp per second (1 xp per 3s), genuinely harder per second than passive stretching
    Each item's xp = sum across its phases at the appropriate rate, rounded. */
 const MORNING = [
   { id:'m1', name:"Bed Child's Pose → Cobra Flow", sub:"Cycles the spine through decompression and gentle extension to flush the discs.", xp:12, phases:[{label:"Hold",sec:60}] },
   { id:'m2', name:"90/90 Hip Switches + Forward Hinge", sub:"Hinge over the front shin to clear the glutes, sit tall to force internal rotation.", xp:12, phases:[{label:"Both Sides",sec:60}] },
-  { id:'m3', name:"World's Greatest Stretch + Hamstring Floss", sub:"Deep lunge, elbow to instep, thoracic twist — then rock hips back to floss the sciatic track.", xp:24, phases:[{label:"Left",sec:60},{label:"Right",sec:60}] },
+  { id:'m3', name:"World's Greatest Stretch + Hamstring Floss", sub:"Deep lunge, elbow to instep, thoracic twist, then rock hips back to floss the sciatic track.", xp:24, phases:[{label:"Left",sec:60},{label:"Right",sec:60}] },
   { id:'m4', name:"Resting Deep Paleo Squat", sub:"Sit deep and breathe, letting the rotated hips settle into a neutral baseline.", xp:12, phases:[{label:"Hold",sec:60}] },
-  { id:'m5', name:"Shoulder CARs", sub:"Slow controlled circle through the shoulder's full rotational range — active, not a loose swing.", xp:20, phases:[{label:"Left Arm",sec:30},{label:"Right Arm",sec:30}] },
+  { id:'m5', name:"Shoulder CARs", sub:"Slow controlled circle through the shoulder's full rotational range: active, not a loose swing.", xp:20, phases:[{label:"Left Arm",sec:30},{label:"Right Arm",sec:30}] },
 ];
 
 const NIGHT = [
@@ -538,9 +574,9 @@ const DESK = [
   { id:'dA', letter:'A', name:'Neurological Shock', desc:'Horse Stance → RKC Plank → Reverse Plank', xp:20,
     phases:[{label:"Horse Stance",sec:30},{label:"RKC Plank",sec:15},{label:"Reverse Plank",sec:15}] },
   { id:'dB', letter:'B', name:'Mechanical Pulley', desc:'Couch Stretch → Elephant Walk', xp:32,
-    phases:[{label:"Couch — Left",sec:30},{label:"Couch — Right",sec:30},{label:"Elephant Walk",sec:60}] },
+    phases:[{label:"Couch (Left)",sec:30},{label:"Couch (Right)",sec:30},{label:"Elephant Walk",sec:60}] },
   { id:'dC', letter:'C', name:'Upper Reset', desc:'Wall Slides → Pec/Thread-the-Needle → Exhale', xp:22,
-    phases:[{label:"Wall Slides",sec:40},{label:"Pec Stretch — L/R",sec:30},{label:"Exhale Reset",sec:15}] },
+    phases:[{label:"Wall Slides",sec:40},{label:"Pec Stretch (L/R)",sec:30},{label:"Exhale Reset",sec:15}] },
 ];
 
 const BADGES = [
@@ -558,7 +594,7 @@ const BADGES = [
 /* ============ BOSS LADDER ============
    Every XP you earn is dealt as damage to the current boss.
    Defeating one advances to the next, permanently. Past the named list,
-   bosses keep generating procedurally (scaling HP) — no final boss. */
+   bosses keep generating procedurally (scaling HP). No final boss. */
 const BOSSES = [
   { name:"Blip", hp:250 },
   { name:"Glim", hp:450 },
@@ -578,7 +614,7 @@ function getBoss(index){
 }
 function tierForIndex(i){ return Math.min(4, Math.floor(i / 2) + 1); }
 
-/* simple hand-drawn slime creature — pure SVG, no images. Visual complexity
+/* simple hand-drawn slime creature: pure SVG, no images. Visual complexity
    escalates with tier: plain -> antenna -> wings+sparkles -> crown. */
 let creatureUidCounter = 0;
 function renderCreatureSVG(tier, size){
@@ -646,7 +682,7 @@ function dealBossDamage(amount){
   return defeated;
 }
 /* if the most recent past day had zero activity across morning/night/desk,
-   the current boss regenerates a small slice of its max HP — checked once per day */
+   the current boss regenerates a small slice of its max HP, checked once per day */
 function checkBossRegen(){
   const t = todayStr();
   if(state.lastRegenCheckedDate === t) return;
@@ -664,8 +700,67 @@ function checkBossRegen(){
     }
   }
 }
+/* ============ ATTACK SYSTEM ============
+   XP -> Level. Level -> how hard each attack hits. Attacks are the only
+   way damage gets dealt, capped per day, spent by hand. */
+const ATTACKS_PER_DAY = 3;
+function attackDamage(){ return 20 + level(state.xp) * 8; }
+let pendingAttackConfirm = false; // transient, not persisted: true while the one-time warning is on screen
 
-/* ============ STATE ============ */
+function performAttack(){
+  const rec = today();
+  if(rec.attacksUsed >= ATTACKS_PER_DAY) return;
+
+  if(pendingAttackConfirm){
+    pendingAttackConfirm = false;
+    executeAttack(rec);
+    return;
+  }
+
+  const unfinished = rec.morningSteps.filter(v=>!v).length + rec.nightSteps.filter(v=>!v).length;
+  if(unfinished > 0 && !rec.attackWarningShown){
+    rec.attackWarningShown = true;
+    pendingAttackConfirm = true;
+    save();
+    renderBossModalContent();
+    return;
+  }
+  executeAttack(rec);
+}
+function cancelAttackWarning(){
+  pendingAttackConfirm = false;
+  renderBossModalContent();
+}
+function executeAttack(rec){
+  rec.attacksUsed++;
+  const dmg = attackDamage();
+  const defeated = dealBossDamage(dmg);
+  save();
+  renderBossChip();
+  if(defeated.length){
+    showBossDefeatModal(defeated);
+  } else {
+    renderBossModalContent();
+  }
+}
+function showBossDefeatModal(defeatedBosses){
+  openOverlay();
+  panel.innerHTML = `
+    <div class="complete-panel">
+      <div class="boss-defeat-banner">
+        ${defeatedBosses.map(b=>`<div class="boss-defeat-title disp">${b.name} Defeated</div>`).join('')}
+        <div class="boss-defeat-next-creature">${renderCreatureSVG(tierForIndex(state.bossIndex), 64)}</div>
+        <div class="boss-defeat-sub mono">Next: ${getBoss(state.bossIndex).name}</div>
+      </div>
+      <div class="timer-controls" style="margin-top:6px;">
+        <button class="tc-btn primary" id="btnDone">Done</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('btnDone').onclick = ()=>{ closeOverlay(); render(); };
+}
+
+
 const STORAGE_KEY = 'anchor_state_v1';
 function todayStr(){
   const d = new Date();
@@ -701,17 +796,19 @@ function save(){
 function today(){
   const t = todayStr();
   if(!state.history[t]){
-    state.history[t] = { morningSteps:[false,false,false,false,false], nightSteps:[false,false], deskCount:0, deskOptions:[], morningFullyDone:false, nightFullyDone:false, fullSystemCounted:false };
+    state.history[t] = { morningSteps:[false,false,false,false,false], nightSteps:[false,false], deskCount:0, deskOptions:[], morningFullyDone:false, nightFullyDone:false, fullSystemCounted:false, attacksUsed:0, attackWarningShown:false };
   }
-  // migrate older saved records that predate the night sequence / 5th morning step
+  // migrate older saved records that predate the night sequence / 5th morning step / attack system
   const rec = state.history[t];
   if(!rec.nightSteps) rec.nightSteps = [false,false];
   if(typeof rec.nightFullyDone === 'undefined') rec.nightFullyDone = false;
+  if(typeof rec.attacksUsed === 'undefined') rec.attacksUsed = 0;
+  if(typeof rec.attackWarningShown === 'undefined') rec.attackWarningShown = false;
   while(rec.morningSteps.length < MORNING.length) rec.morningSteps.push(false);
   return rec;
 }
 
-/* recompute streak by walking backward from today — requires Morning AND Night both complete */
+/* recompute streak by walking backward from today: requires Morning AND Night both complete */
 function recomputeStreak(){
   let streak = 0;
   let d = new Date();
@@ -752,15 +849,79 @@ function checkBadges(){
 /* ============ RENDER ============ */
 function level(xp){ return Math.floor(xp/150)+1; }
 
-function renderBossPanel(){
+function renderXpBar(){
+  const lvl = level(state.xp);
+  const into = state.xp % 150;
+  const pct = (into / 150) * 100;
+  document.getElementById('xpBarFill').style.width = pct + '%';
+  document.getElementById('xpBarLabel').textContent = into + ' / 150 XP to Level ' + (lvl + 1);
+}
+
+function renderBossChip(){
   const boss = getBoss(state.bossIndex);
   const pct = Math.max(0, Math.min(100, (state.bossHP / boss.hp) * 100));
-  document.getElementById('bossIndexLabel').textContent = '#' + (state.bossIndex + 1);
-  document.getElementById('bossName').textContent = boss.name;
-  document.getElementById('bossCreature').innerHTML = renderCreatureSVG(tierForIndex(state.bossIndex), 104);
-  document.getElementById('bossHpFill').style.width = pct + '%';
-  document.getElementById('bossHpText').textContent = Math.max(0, Math.round(state.bossHP)) + ' / ' + boss.hp + ' HP';
+  document.getElementById('bossChipCreature').innerHTML = renderCreatureSVG(tierForIndex(state.bossIndex), 26);
+  document.getElementById('bossChipHpFill').style.width = pct + '%';
 }
+
+/* builds the full boss detail (name, big creature, HP bar, attack area) into the
+   shared timer/completion overlay, reusing that panel rather than a permanent
+   on-page section, since the boss game is secondary to the actual routine */
+function renderBossModalContent(){
+  const boss = getBoss(state.bossIndex);
+  const pct = Math.max(0, Math.min(100, (state.bossHP / boss.hp) * 100));
+  const rec = today();
+  const attacksLeft = ATTACKS_PER_DAY - rec.attacksUsed;
+
+  let attackAreaHtml;
+  if(pendingAttackConfirm){
+    attackAreaHtml = `
+      <div class="attack-warning mono">Finishing your routine first could hit harder. Attack anyway?</div>
+      <div class="attack-btn-row">
+        <button class="tc-btn" id="btnCancelAttack">Finish First</button>
+        <button class="tc-btn primary" id="btnConfirmAttack">Attack Anyway</button>
+      </div>
+    `;
+  } else if(attacksLeft <= 0){
+    attackAreaHtml = `<div class="attack-exhausted mono">No attacks left today. Back tomorrow.</div>`;
+  } else {
+    attackAreaHtml = `
+      <button class="attack-btn disp" id="btnAttack">Attack &middot; ${attackDamage()} DMG</button>
+      <div class="attack-count mono">${attacksLeft} / ${ATTACKS_PER_DAY} attacks left today</div>
+    `;
+  }
+
+  panel.innerHTML = `
+    <div class="boss-panel" style="margin-bottom:0;">
+      <div class="boss-head">
+        <div class="boss-eyebrow mono">CURRENT BOSS #${state.bossIndex + 1}</div>
+      </div>
+      <div class="boss-creature">${renderCreatureSVG(tierForIndex(state.bossIndex), 104)}</div>
+      <div class="boss-name disp">${boss.name}</div>
+      <div class="boss-hp-track"><div class="boss-hp-fill" style="width:${pct}%"></div></div>
+      <div class="boss-hp-row">
+        <span class="boss-hp-text mono">${Math.max(0, Math.round(state.bossHP))} / ${boss.hp} HP</span>
+      </div>
+      <div class="boss-attack-area">${attackAreaHtml}</div>
+      <div class="timer-controls" style="margin-top:18px;">
+        <button class="tc-btn" id="btnCloseBoss">Close</button>
+      </div>
+    </div>
+  `;
+  if(pendingAttackConfirm){
+    document.getElementById('btnCancelAttack').onclick = cancelAttackWarning;
+    document.getElementById('btnConfirmAttack').onclick = performAttack;
+  } else if(attacksLeft > 0){
+    document.getElementById('btnAttack').onclick = performAttack;
+  }
+  document.getElementById('btnCloseBoss').onclick = ()=>{ closeOverlay(); };
+}
+
+function showBossDetail(){
+  renderBossModalContent();
+  openOverlay();
+}
+
 
 function renderSequenceCards(containerId, data, doneArr, kind){
   const container = document.getElementById(containerId);
@@ -800,9 +961,8 @@ function renderSequenceCards(containerId, data, doneArr, kind){
 function render(){
   const rec = today();
   document.getElementById('statStreak').textContent = state.streak;
-  document.getElementById('statXP').textContent = state.xp;
-  document.getElementById('statLevel').textContent = level(state.xp);
-  renderBossPanel();
+  renderXpBar();
+  renderBossChip();
 
   const doneCount = rec.morningSteps.filter(Boolean).length;
   document.getElementById('heroDone').textContent = doneCount;
@@ -928,7 +1088,7 @@ function buildHeatmap(){
   }
 
   // day cells: position explicitly by actual date offset, not DOM order.
-  // Always render the full rectangle (numWeeks × 7) — future days in the current week
+  // Always render the full rectangle (numWeeks x 7). Future days in the current week
   // are styled the same as "no activity" so the grid never has a jagged trailing edge.
   let activeDays = 0;
   let cur = new Date(start);
@@ -952,7 +1112,7 @@ function buildHeatmap(){
 
     const cell = document.createElement('div');
     cell.className = 'hc ' + cls;
-    cell.title = key + ' — ' + label;
+    cell.title = key + ': ' + label;
     cell.style.gridColumn = String(col);
     cell.style.gridRow = String(row);
     chart.appendChild(cell);
@@ -972,7 +1132,7 @@ function classifyDay(rec){
   const d = rec.deskCount > 0;
   const count = (m?1:0) + (n?1:0) + (d?1:0);
   if(count === 0) return { cls:'hc-none', label:'no activity' };
-  if(count === 3) return { cls:'hc-full', label:'full system — morning + night + desk' };
+  if(count === 3) return { cls:'hc-full', label:'full system (morning + night + desk)' };
   if(count === 1){
     if(m) return { cls:'hc-m', label:'morning complete' };
     if(n) return { cls:'hc-n', label:'night complete' };
@@ -1020,7 +1180,7 @@ async function requestWakeLock(){
   try{
     wakeLockSentinel = await navigator.wakeLock.request('screen');
     wakeLockSentinel.addEventListener('release', ()=>{ wakeLockSentinel = null; });
-  }catch(e){ wakeLockSentinel = null; } // silently ignore — battery saver, unsupported iOS version, etc.
+  }catch(e){ wakeLockSentinel = null; } // silently ignore: battery saver, unsupported iOS version, etc.
 }
 function releaseWakeLock(){
   if(wakeLockSentinel){
@@ -1201,13 +1361,11 @@ function completeMovement(){
   }
 
   newlyUnlocked = checkBadges();
-  const totalXpThisAction = item.xp + bonuses.reduce((s,b)=>s+b.amount, 0);
-  const defeatedBosses = dealBossDamage(totalXpThisAction);
   save();
-  showCompletion(item, kind, newlyUnlocked, bonuses, defeatedBosses);
+  showCompletion(item, kind, newlyUnlocked, bonuses);
 }
 
-function showCompletion(item, kind, newlyUnlocked, bonuses, defeatedBosses){
+function showCompletion(item, kind, newlyUnlocked, bonuses){
   const titleText = kind==='morning' ? 'Segment Locked In' : kind==='night' ? 'Wind-Down Logged' : 'Reset Complete';
   panel.innerHTML = `
     <div class="complete-panel">
@@ -1218,13 +1376,6 @@ function showCompletion(item, kind, newlyUnlocked, bonuses, defeatedBosses){
         <div class="xp-toast mono">+ ${item.xp} XP</div>
         ${bonuses.map(b=>`<div class="xp-toast xp-bonus mono">+ ${b.amount} XP · ${b.label.toUpperCase()}</div>`).join('')}
       </div>
-      ${defeatedBosses.length ? `
-        <div class="boss-defeat-banner">
-          ${defeatedBosses.map(b=>`<div class="boss-defeat-title disp">${b.name} Defeated</div>`).join('')}
-          <div class="boss-defeat-next-creature">${renderCreatureSVG(tierForIndex(state.bossIndex), 56)}</div>
-          <div class="boss-defeat-sub mono">Next: ${getBoss(state.bossIndex).name}</div>
-        </div>
-      ` : ''}
       ${newlyUnlocked.length ? `
         <div class="badge-unlock-row">
           ${newlyUnlocked.map(b=>`<div class="badge-unlock"><div class="badge-icon mono">${b.days}</div><div class="badge-label mono">${b.label}</div></div>`).join('')}
@@ -1248,6 +1399,7 @@ today();
 recomputeStreak();
 checkBadges();
 checkBossRegen();
+document.getElementById('bossChip').onclick = showBossDetail;
 render();
 </script>
 </body>
