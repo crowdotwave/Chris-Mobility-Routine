@@ -84,17 +84,21 @@
 
   .topbar-right{ display:flex; align-items:center; gap:14px; }
   .boss-chip{
-    position:relative; width:36px; height:36px; border-radius:50%;
-    background:var(--elevated); border:1.5px solid var(--magenta);
+    position:relative; width:46px; height:46px; border-radius:50%;
+    background:var(--elevated); border:2px solid var(--magenta);
     cursor:pointer; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 0 10px -2px rgba(255,46,196,0.5);
     flex-shrink:0;
+    animation:bossChipGlow 2.2s ease-in-out infinite;
+  }
+  @keyframes bossChipGlow{
+    0%,100%{ box-shadow:0 0 10px -1px rgba(255,46,196,0.55); }
+    50%{ box-shadow:0 0 20px 3px rgba(255,46,196,0.9), 0 0 30px 4px rgba(157,92,255,0.4); }
   }
   .boss-chip:active{ transform:scale(0.92); }
-  .boss-chip-creature{ width:26px; height:26px; }
+  .boss-chip-creature{ width:34px; height:34px; }
   .boss-chip-creature svg{ width:100%; height:100%; display:block; }
   .boss-chip-hp-track{
-    position:absolute; bottom:-5px; left:2px; right:2px; height:3px;
+    position:absolute; bottom:-6px; left:3px; right:3px; height:3.5px;
     border-radius:2px; background:var(--elevated-hi); overflow:hidden;
   }
   .boss-chip-hp-fill{ height:100%; background:var(--grad); transition:width .4s ease; }
@@ -343,6 +347,7 @@
   .hc-nd{ background:linear-gradient(90deg, var(--purple) 0%, var(--purple) 50%, var(--steel) 50%, var(--steel) 100%); border-color:var(--purple); }
   /* all three: full reward gradient */
   .hc-full{ background:linear-gradient(135deg, var(--cyan), var(--purple) 50%, var(--magenta)); border-color:var(--magenta); box-shadow:0 0 9px 0 rgba(255,46,196,0.75); }
+  .hc-today{ outline:2px solid #ffffff; outline-offset:1px; }
   .heatmap-legend{ display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; padding:0 2px; }
   .hl-item{ display:flex; align-items:center; gap:5px; font-size:9.5px; color:var(--text-dim); }
   .hl-swatch{ width:10px; height:10px; border-radius:3px; display:inline-block; }
@@ -352,6 +357,7 @@
   .hl-night{ background:var(--purple); }
   .hl-combo{ background:linear-gradient(90deg, var(--cyan) 0%, var(--cyan) 50%, var(--purple) 50%, var(--purple) 100%); }
   .hl-full{ background:linear-gradient(135deg,var(--cyan),var(--purple) 50%,var(--magenta)); }
+  .hl-today{ background:var(--elevated-hi); border:1px solid var(--border); outline:2px solid #ffffff; outline-offset:1px; }
 
   /* ---------- footer ---------- */
   .foot-note{ text-align:center; color:var(--text-faint); font-size:10.5px; letter-spacing:.5px; padding:18px 0 6px; }
@@ -508,6 +514,7 @@
       <span class="hl-item"><span class="hl-swatch hl-night"></span>Night</span>
       <span class="hl-item"><span class="hl-swatch hl-combo"></span>2 done</span>
       <span class="hl-item"><span class="hl-swatch hl-full"></span>Full system</span>
+      <span class="hl-item"><span class="hl-swatch hl-today"></span>Today</span>
     </div>
   </div>
 
@@ -860,7 +867,7 @@ function renderXpBar(){
 function renderBossChip(){
   const boss = getBoss(state.bossIndex);
   const pct = Math.max(0, Math.min(100, (state.bossHP / boss.hp) * 100));
-  document.getElementById('bossChipCreature').innerHTML = renderCreatureSVG(tierForIndex(state.bossIndex), 26);
+  document.getElementById('bossChipCreature').innerHTML = renderCreatureSVG(tierForIndex(state.bossIndex), 34);
   document.getElementById('bossChipHpFill').style.width = pct + '%';
 }
 
@@ -1109,10 +1116,11 @@ function buildHeatmap(){
     const dayOffset = Math.round((cur - start) / 86400000);
     const col = Math.floor(dayOffset / 7) + 1;
     const row = (dayOffset % 7) + 2;
+    const isToday = cur.getTime() === now.getTime();
 
     const cell = document.createElement('div');
-    cell.className = 'hc ' + cls;
-    cell.title = key + ': ' + label;
+    cell.className = 'hc ' + cls + (isToday ? ' hc-today' : '');
+    cell.title = key + (isToday ? ' (today)' : '') + ': ' + label;
     cell.style.gridColumn = String(col);
     cell.style.gridRow = String(row);
     chart.appendChild(cell);
