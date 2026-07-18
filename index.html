@@ -195,6 +195,7 @@
     color:var(--text-dim); background:var(--elevated); border:1px solid var(--border);
     padding:2px 7px; border-radius:20px;
   }
+  .card-actions{ display:flex; flex-direction:column; gap:8px; align-items:center; flex-shrink:0; }
   .card-btn{
     flex-shrink:0; width:38px; height:38px; border-radius:50%;
     border:1px solid var(--border-hi); background:var(--elevated-hi);
@@ -203,30 +204,60 @@
   }
   .card-btn:active{ transform:scale(.9); }
   .card-btn svg{ width:14px; height:14px; }
+  .card-search-btn{
+    flex-shrink:0; width:34px; height:34px; border-radius:50%;
+    border:1px solid var(--border); background:transparent;
+    color:var(--text-faint); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .15s ease;
+  }
+  .card-search-btn:active{ transform:scale(.9); }
+  .card-search-btn:hover{ color:var(--cyan); border-color:var(--cyan); }
+  .card-search-btn svg{ width:15px; height:15px; }
 
   /* desk option grid */
   .desk-grid{ display:grid; grid-template-columns:1fr; gap:10px; }
   .desk-card{
     position:relative; background:var(--surface); border:1px solid var(--border);
-    border-radius:10px; padding:15px; cursor:pointer; transition:all .18s ease;
+    border-radius:12px; padding:14px; transition:all .18s ease;
   }
   .desk-card::before, .desk-card::after{ content:''; position:absolute; width:10px; height:10px; }
   .desk-card::before{ top:-1px; left:-1px; border-top:2px solid var(--purple); border-left:2px solid var(--purple); border-radius:4px 0 0 0; opacity:0; transition:opacity .2s; }
   .desk-card::after{ bottom:-1px; right:-1px; border-bottom:2px solid var(--cyan); border-right:2px solid var(--cyan); border-radius:0 0 4px 0; opacity:0; transition:opacity .2s; }
-  .desk-card:active{ transform:scale(.98); }
   .desk-card:hover::before, .desk-card:hover::after{ opacity:1; }
+  .desk-card-head{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
   .desk-letter{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:24px; height:24px; border-radius:6px; font-family:'JetBrains Mono',monospace;
-    font-weight:700; font-size:12px; background:var(--elevated); border:1px solid var(--border);
-    color:var(--purple); margin-bottom:8px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    width:30px; height:30px; border-radius:8px; font-family:'JetBrains Mono',monospace;
+    font-weight:700; font-size:13px; background:var(--elevated); border:1px solid var(--border);
+    color:var(--purple);
   }
-  .desk-name{ font-size:14px; font-weight:600; margin-bottom:4px; }
-  .desk-steps{ font-size:11.5px; color:var(--text-dim); line-height:1.5; }
-  .desk-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
-  .desk-count{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); }
-  .desk-count.has{ color:var(--cyan); }
-  .go-arrow{ color:var(--text-dim); font-size:16px; }
+  .desk-head-text{ flex:1; min-width:0; }
+  .desk-name{ font-size:14.5px; font-weight:600; }
+  .desk-head-meta{ font-size:10px; color:var(--text-dim); margin-top:2px; }
+  .desk-count-badge{
+    flex-shrink:0; font-size:11px; color:var(--cyan); background:var(--elevated-hi);
+    border:1px solid var(--cyan); border-radius:12px; padding:3px 9px;
+  }
+  .desk-exercise-list{ display:flex; flex-direction:column; gap:7px; margin-bottom:12px; }
+  .desk-exercise-row{
+    display:flex; align-items:center; gap:10px;
+    background:var(--elevated); border:1px solid var(--border);
+    border-radius:10px; padding:10px 12px; cursor:pointer; transition:all .15s ease;
+  }
+  .desk-exercise-row:active{ transform:scale(.97); background:var(--elevated-hi); }
+  .desk-exercise-row:hover{ border-color:var(--cyan); }
+  .desk-exercise-name{ flex:1; font-size:13px; font-weight:500; }
+  .desk-exercise-time{ font-size:10.5px; color:var(--text-dim); flex-shrink:0; }
+  .desk-exercise-search-icon{ width:15px; height:15px; color:var(--text-faint); flex-shrink:0; }
+  .desk-exercise-row:hover .desk-exercise-search-icon{ color:var(--cyan); }
+  .desk-start-btn{
+    width:100%; border:none; cursor:pointer;
+    background:var(--grad); color:#05060a; font-weight:700; font-size:13px;
+    letter-spacing:.5px; padding:11px; border-radius:10px;
+    box-shadow:0 0 16px -6px rgba(157,92,255,0.5);
+    transition:transform .15s ease;
+  }
+  .desk-start-btn:active{ transform:scale(.97); }
 
   /* ---------- badges ---------- */
   .badge-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
@@ -327,6 +358,12 @@
   }
   .cstat-l{ font-size:7.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
 
+  .heatmap-direction{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:9px; color:var(--text-faint); letter-spacing:1px; text-transform:uppercase;
+    margin-bottom:8px; padding:0 2px;
+  }
+  .heatmap-direction-arrow{ color:var(--magenta); font-size:12px; }
   .heatmap-wrap{ overflow-x:auto; padding:2px 2px 6px; }
   .heatmap-chart{
     display:grid; gap:4px; width:max-content;
@@ -335,7 +372,15 @@
     font-size:9px; color:var(--text-faint); letter-spacing:.5px; white-space:nowrap;
     font-family:'JetBrains Mono',monospace; align-self:end; padding-bottom:2px;
   }
-  .hc{ width:17px; height:17px; border-radius:4px; background:var(--elevated-hi); border:1px solid var(--border); transition:transform .12s ease; }
+  @keyframes hcPopIn{
+    from{ opacity:0; transform:scale(.4); }
+    to{ opacity:1; transform:scale(1); }
+  }
+  .hc{
+    width:17px; height:17px; border-radius:4px; background:var(--elevated-hi); border:1px solid var(--border);
+    transition:transform .12s ease;
+    animation:hcPopIn .35s ease backwards;
+  }
   .hc:hover{ transform:scale(1.25); }
   /* single category */
   .hc-m{ background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 6px 0 rgba(0,229,255,0.5); }
@@ -345,9 +390,20 @@
   .hc-mn{ background:linear-gradient(90deg, var(--cyan) 0%, var(--cyan) 50%, var(--purple) 50%, var(--purple) 100%); border-color:var(--purple); box-shadow:0 0 6px 0 rgba(157,92,255,0.4); }
   .hc-md{ background:linear-gradient(90deg, var(--cyan) 0%, var(--cyan) 50%, var(--steel) 50%, var(--steel) 100%); border-color:var(--cyan); }
   .hc-nd{ background:linear-gradient(90deg, var(--purple) 0%, var(--purple) 50%, var(--steel) 50%, var(--steel) 100%); border-color:var(--purple); }
-  /* all three: full reward gradient */
-  .hc-full{ background:linear-gradient(135deg, var(--cyan), var(--purple) 50%, var(--magenta)); border-color:var(--magenta); box-shadow:0 0 9px 0 rgba(255,46,196,0.75); }
-  .hc-today{ outline:2px solid #ffffff; outline-offset:1px; }
+  /* all three: full reward gradient, with a slow subtle shimmer */
+  @keyframes hcFullShimmer{
+    0%,100%{ box-shadow:0 0 9px 0 rgba(255,46,196,0.55); }
+    50%{ box-shadow:0 0 13px 1px rgba(255,46,196,0.9); }
+  }
+  .hc-full{
+    background:linear-gradient(135deg, var(--cyan), var(--purple) 50%, var(--magenta)); border-color:var(--magenta);
+    animation:hcPopIn .35s ease backwards, hcFullShimmer 2.6s ease-in-out infinite .35s;
+  }
+  @keyframes hcTodayPulse{
+    0%,100%{ outline-color:#ffffff; box-shadow:0 0 0 0 rgba(255,255,255,0.5); }
+    50%{ outline-color:#ffffff; box-shadow:0 0 6px 1px rgba(255,255,255,0.7); }
+  }
+  .hc-today{ outline:2px solid #ffffff; outline-offset:1px; animation:hcPopIn .35s ease backwards, hcTodayPulse 1.8s ease-in-out infinite; }
   .heatmap-legend{ display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; padding:0 2px; }
   .hl-item{ display:flex; align-items:center; gap:5px; font-size:9.5px; color:var(--text-dim); }
   .hl-swatch{ width:10px; height:10px; border-radius:3px; display:inline-block; }
@@ -425,9 +481,6 @@
     border:1px solid var(--purple); border-radius:10px; padding:10px 12px; box-shadow:0 0 16px -4px rgba(157,92,255,.7);
   }
 
-  @media (min-width:520px){
-    .desk-grid{ grid-template-columns:1fr 1fr; }
-  }
   @media (max-width:380px){
     .timer-ring{ width:220px; height:220px; }
     .timer-ring svg{ width:220px; height:220px; }
@@ -504,6 +557,11 @@
         </div>
       </div>
     </div>
+    <div class="heatmap-direction mono">
+      <span>13 weeks ago</span>
+      <span class="heatmap-direction-arrow">&rarr;</span>
+      <span>Today</span>
+    </div>
     <div class="heatmap-wrap">
       <div class="heatmap-chart" id="heatmapChart"></div>
     </div>
@@ -569,7 +627,7 @@ const MORNING = [
   { id:'m2', name:"90/90 Hip Switches + Forward Hinge", sub:"Hinge over the front shin to clear the glutes, sit tall to force internal rotation.", xp:12, phases:[{label:"Both Sides",sec:60}] },
   { id:'m3', name:"World's Greatest Stretch + Hamstring Floss", sub:"Deep lunge, elbow to instep, thoracic twist, then rock hips back to floss the sciatic track.", xp:24, phases:[{label:"Left",sec:60},{label:"Right",sec:60}] },
   { id:'m4', name:"Resting Deep Paleo Squat", sub:"Sit deep and breathe, letting the rotated hips settle into a neutral baseline.", xp:12, phases:[{label:"Hold",sec:60}] },
-  { id:'m5', name:"Shoulder CARs", sub:"Slow controlled circle through the shoulder's full rotational range: active, not a loose swing.", xp:20, phases:[{label:"Left Arm",sec:30},{label:"Right Arm",sec:30}] },
+  { id:'m5', name:"Shoulder + Neck CARs", sub:"Slow controlled circles through the shoulder's full rotational range, then the neck's: active, not a loose swing.", xp:27, phases:[{label:"Left Arm",sec:30},{label:"Right Arm",sec:30},{label:"Neck",sec:20}] },
 ];
 
 const NIGHT = [
@@ -578,13 +636,24 @@ const NIGHT = [
 ];
 
 const DESK = [
-  { id:'dA', letter:'A', name:'Neurological Shock', desc:'Horse Stance → RKC Plank → Reverse Plank', xp:20,
-    phases:[{label:"Horse Stance",sec:30},{label:"RKC Plank",sec:15},{label:"Reverse Plank",sec:15}] },
-  { id:'dB', letter:'B', name:'Mechanical Pulley', desc:'Couch Stretch → Elephant Walk', xp:32,
-    phases:[{label:"Couch (Left)",sec:30},{label:"Couch (Right)",sec:30},{label:"Elephant Walk",sec:60}] },
-  { id:'dC', letter:'C', name:'Upper Reset', desc:'Wall Slides → Pec/Thread-the-Needle → Exhale', xp:22,
-    phases:[{label:"Wall Slides",sec:40},{label:"Pec Stretch (L/R)",sec:30},{label:"Exhale Reset",sec:15}] },
+  { id:'dA', letter:'A', name:'Full-Body Activation', xp:20,
+    phases:[{label:"Horse Stance",sec:30},{label:"RKC Plank",sec:15},{label:"Reverse Plank",sec:15}],
+    exercises:[{name:"Horse Stance",sec:30},{name:"RKC Plank",sec:15},{name:"Reverse Plank",sec:15}] },
+  { id:'dB', letter:'B', name:'Hip Flexor & Hamstring Stretch', xp:32,
+    phases:[{label:"Couch (Left)",sec:30},{label:"Couch (Right)",sec:30},{label:"Elephant Walk",sec:60}],
+    exercises:[{name:"Couch Stretch",sec:60},{name:"Elephant Walk",sec:60}] },
+  { id:'dC', letter:'C', name:'Upper Body & Breathing', xp:22,
+    phases:[{label:"Wall Slides",sec:40},{label:"Pec Stretch (L/R)",sec:30},{label:"Exhale Reset",sec:15}],
+    exercises:[{name:"Wall Slides",sec:40},{name:"Pec Stretch / Thread-the-Needle",sec:30},{name:"Exhale Reset (breathing)",sec:15}] },
 ];
+
+/* opens a Google search for an exercise name in a new tab, used by the small
+   search affordance on every movement card so the person can quickly look up
+   proper form without leaving their spot */
+function searchExercise(name){
+  const q = encodeURIComponent(name + ' exercise stretch how to');
+  window.open('https://www.google.com/search?q=' + q, '_blank', 'noopener');
+}
 
 const BADGES = [
   { id:'d1',   days:1,   label:'1 Day',    tier:1 },
@@ -950,15 +1019,21 @@ function renderSequenceCards(containerId, data, doneArr, kind){
           <span class="chip mono">+${m.xp} xp</span>
         </div>
       </div>
-      <button class="card-btn" aria-label="Start">
-        ${done ? '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="'+checkColor+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-               : '<svg viewBox="0 0 24 24" fill="none"><path d="M7 5v14l11-7z" fill="currentColor"/></svg>'}
-      </button>
+      <div class="card-actions">
+        <button class="card-search-btn" aria-label="Search this exercise" title="Look up this exercise">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="card-btn" aria-label="Start">
+          ${done ? '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="'+checkColor+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                 : '<svg viewBox="0 0 24 24" fill="none"><path d="M7 5v14l11-7z" fill="currentColor"/></svg>'}
+        </button>
+      </div>
     `;
+    card.querySelector('.card-search-btn').onclick = (e)=>{ e.stopPropagation(); searchExercise(m.name); };
     if(!done){
       card.querySelector('.card-btn').onclick = ()=> runMovement(kind, i);
       card.style.cursor = 'pointer';
-      card.onclick = (e)=>{ if(e.target.closest('.card-btn')) return; runMovement(kind, i); };
+      card.onclick = (e)=>{ if(e.target.closest('.card-btn') || e.target.closest('.card-search-btn')) return; runMovement(kind, i); };
     }
     container.appendChild(card);
   });
@@ -1001,18 +1076,33 @@ function render(){
   dg.innerHTML = '';
   DESK.forEach(d=>{
     const count = rec.deskOptions.filter(x=>x===d.id).length;
+    const totalSec = d.phases.reduce((s,p)=>s+p.sec, 0);
     const card = document.createElement('div');
     card.className = 'desk-card';
     card.innerHTML = `
-      <div class="desk-letter mono">${d.letter}</div>
-      <div class="desk-name">${d.name}</div>
-      <div class="desk-steps">${d.desc}</div>
-      <div class="desk-foot">
-        <span class="desk-count mono ${count>0?'has':''}">${count>0 ? '×'+count+' today' : '+'+d.xp+' xp'}</span>
-        <span class="go-arrow">→</span>
+      <div class="desk-card-head">
+        <div class="desk-letter mono">${d.letter}</div>
+        <div class="desk-head-text">
+          <div class="desk-name">${d.name}</div>
+          <div class="desk-head-meta mono">${totalSec}s total &middot; +${d.xp} xp</div>
+        </div>
+        ${count > 0 ? `<div class="desk-count-badge mono">&times;${count}</div>` : ''}
       </div>
+      <div class="desk-exercise-list">
+        ${d.exercises.map(ex => `
+          <div class="desk-exercise-row" data-name="${ex.name}">
+            <span class="desk-exercise-name">${ex.name}</span>
+            <span class="desk-exercise-time mono">${ex.sec}s</span>
+            <svg class="desk-exercise-search-icon" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+        `).join('')}
+      </div>
+      <button class="desk-start-btn disp">Start &middot; ${totalSec}s</button>
     `;
-    card.onclick = ()=> runMovement('desk', DESK.indexOf(d));
+    card.querySelectorAll('.desk-exercise-row').forEach(row=>{
+      row.onclick = ()=> searchExercise(row.dataset.name);
+    });
+    card.querySelector('.desk-start-btn').onclick = ()=> runMovement('desk', DESK.indexOf(d));
     dg.appendChild(card);
   });
 
@@ -1073,24 +1163,22 @@ function buildHeatmap(){
   chart.style.gridTemplateColumns = `repeat(${numWeeks}, 17px)`;
   chart.style.gridTemplateRows = `12px repeat(7, 17px)`;
 
-  // month labels: place a label in whichever column actually contains the 1st of that month
+  // month labels: a label marks the first column that falls in that month,
+  // consistently for every column including the first (previously column 0 used
+  // a different rule than the rest, which produced misleading gap spacing)
+  let prevLabelMonth = null;
   for(let w = 0; w < numWeeks; w++){
     const weekStart = new Date(start);
     weekStart.setDate(start.getDate() + w*7);
-    let label = '';
-    for(let i = 0; i < 7; i++){
-      const d = new Date(weekStart);
-      d.setDate(weekStart.getDate() + i);
-      if(d.getDate() === 1){ label = MONTH_ABBR[d.getMonth()]; break; }
-    }
-    if(w === 0 && !label) label = MONTH_ABBR[weekStart.getMonth()];
-    if(label){
+    const m = weekStart.getMonth();
+    if(w === 0 || m !== prevLabelMonth){
       const labelEl = document.createElement('div');
       labelEl.className = 'hc-label';
-      labelEl.textContent = label;
+      labelEl.textContent = MONTH_ABBR[m];
       labelEl.style.gridColumn = String(w + 1);
       labelEl.style.gridRow = '1';
       chart.appendChild(labelEl);
+      prevLabelMonth = m;
     }
   }
 
@@ -1123,6 +1211,7 @@ function buildHeatmap(){
     cell.title = key + (isToday ? ' (today)' : '') + ': ' + label;
     cell.style.gridColumn = String(col);
     cell.style.gridRow = String(row);
+    cell.style.animationDelay = (col * 14) + 'ms';
     chart.appendChild(cell);
     cur.setDate(cur.getDate()+1);
   }
