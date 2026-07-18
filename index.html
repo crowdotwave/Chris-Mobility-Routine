@@ -363,8 +363,14 @@
     font-size:9px; color:var(--text-faint); letter-spacing:1px; text-transform:uppercase;
     margin-bottom:8px; padding:0 2px;
   }
-  .heatmap-direction-arrow{ color:var(--magenta); font-size:12px; }
-  .heatmap-wrap{ overflow-x:auto; padding:2px 2px 6px; }
+  .heatmap-row{ display:flex; gap:5px; align-items:flex-start; }
+  .heatmap-daylabels{
+    flex-shrink:0; display:grid; grid-template-rows:12px repeat(7, 17px); gap:4px;
+  }
+  .heatmap-daylabels span{
+    font-size:7.5px; color:var(--text-faint); line-height:17px; text-align:right;
+  }
+  .heatmap-wrap{ overflow-x:auto; padding:2px 2px 6px; flex:1; }
   .heatmap-chart{
     display:grid; gap:4px; width:max-content;
   }
@@ -559,11 +565,13 @@
     </div>
     <div class="heatmap-direction mono">
       <span>13 weeks ago</span>
-      <span class="heatmap-direction-arrow">&rarr;</span>
       <span>Today</span>
     </div>
-    <div class="heatmap-wrap">
-      <div class="heatmap-chart" id="heatmapChart"></div>
+    <div class="heatmap-row">
+      <div class="heatmap-daylabels mono" id="heatmapDayLabels"></div>
+      <div class="heatmap-wrap">
+        <div class="heatmap-chart" id="heatmapChart"></div>
+      </div>
     </div>
     <div class="heatmap-legend mono">
       <span class="hl-item"><span class="hl-swatch hl-none"></span>None</span>
@@ -642,9 +650,9 @@ const DESK = [
   { id:'dB', letter:'B', name:'Hip Flexor & Hamstring Stretch', xp:32,
     phases:[{label:"Couch (Left)",sec:30},{label:"Couch (Right)",sec:30},{label:"Elephant Walk",sec:60}],
     exercises:[{name:"Couch Stretch",sec:60},{name:"Elephant Walk",sec:60}] },
-  { id:'dC', letter:'C', name:'Upper Body & Breathing', xp:22,
-    phases:[{label:"Wall Slides",sec:40},{label:"Pec Stretch (L/R)",sec:30},{label:"Exhale Reset",sec:15}],
-    exercises:[{name:"Wall Slides",sec:40},{name:"Pec Stretch / Thread-the-Needle",sec:30},{name:"Exhale Reset (breathing)",sec:15}] },
+  { id:'dC', letter:'C', name:'Upper Body', xp:19,
+    phases:[{label:"Wall Slides",sec:40},{label:"Pec Stretch (L/R)",sec:30}],
+    exercises:[{name:"Wall Slides",sec:40},{name:"Pec Stretch / Thread-the-Needle",sec:30}] },
 ];
 
 /* opens a Google search for an exercise name in a new tab, used by the small
@@ -1151,6 +1159,13 @@ function buildHeatmap(){
   const chart = document.getElementById('heatmapChart');
   if(!chart) return;
   chart.innerHTML = '';
+
+  const dayLabelsEl = document.getElementById('heatmapDayLabels');
+  if(dayLabelsEl && !dayLabelsEl.dataset.built){
+    const DOW = ['S','M','T','W','T','F','S'];
+    dayLabelsEl.innerHTML = '<span></span>' + DOW.map(d=>`<span>${d}</span>`).join('');
+    dayLabelsEl.dataset.built = '1';
+  }
 
   const totalDays = 91; // ~13 weeks
   const now = new Date();
