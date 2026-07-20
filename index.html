@@ -358,11 +358,6 @@
   }
   .cstat-l{ font-size:7.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
 
-  .heatmap-direction{
-    display:flex; justify-content:space-between; align-items:center;
-    font-size:9px; color:var(--text-faint); letter-spacing:1px; text-transform:uppercase;
-    margin-bottom:8px; padding:0 2px;
-  }
   .heatmap-row{ display:flex; gap:5px; align-items:flex-start; }
   .heatmap-daylabels{
     flex-shrink:0; display:grid; grid-template-rows:12px repeat(7, 17px); gap:4px;
@@ -491,11 +486,137 @@
     .timer-ring{ width:220px; height:220px; }
     .timer-ring svg{ width:220px; height:220px; }
   }
+  /* ============ TAB BAR ============ */
+  .tab-bar{
+    position:fixed; bottom:0; left:0; right:0; z-index:40;
+    display:flex; background:rgba(10,11,16,0.92); backdrop-filter:blur(14px);
+    border-top:1px solid var(--border-hi);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .tab-btn{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+    background:none; border:none; cursor:pointer; padding:10px 0 8px;
+    color:var(--text-faint); font-family:'Inter',sans-serif; font-size:10.5px; font-weight:600;
+    transition:color .15s ease;
+  }
+  .tab-btn svg{ width:20px; height:20px; }
+  .tab-btn.active{ color:var(--cyan); }
+  .tab-btn:active{ transform:scale(.95); }
+  body{ padding-bottom:74px; }
+
+  /* ============ PLANK VIEW (ported, recolored to Anchor's palette) ============ */
+  .plank-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; padding-top:6px; }
+  .plank-wordmark{ font-size:15px; letter-spacing:.28em; color:var(--text-dim); text-transform:uppercase; }
+  .plank-streak-pill{
+    display:flex; align-items:center; gap:6px; background:var(--elevated); border:1px solid var(--border-hi);
+    padding:6px 12px 6px 10px; border-radius:999px; font-weight:600; font-size:14px;
+  }
+  .plank-flame{ font-size:14px; filter:drop-shadow(0 0 6px rgba(255,46,196,0.5)); }
+
+  .plank-timer-stage{ display:flex; flex-direction:column; align-items:center; padding:28px 0 20px; }
+  .plank-timer-ring{
+    position:relative; width:230px; height:230px; border-radius:50%; border:none; padding:0;
+    background:transparent; cursor:pointer; display:block;
+  }
+  .plank-timer-ring::before{
+    content:''; position:absolute; inset:0; border-radius:50%;
+    background:conic-gradient(from 0deg, var(--cyan), var(--purple), var(--magenta), var(--cyan));
+    filter:saturate(1.1); transition:filter .3s ease;
+  }
+  .plank-timer-ring::after{
+    content:''; position:absolute; inset:0; border-radius:50%;
+    box-shadow:0 0 0 rgba(157,92,255,0); transition:box-shadow .4s ease; pointer-events:none;
+  }
+  .plank-timer-ring.plank-idle::after{ animation:plankIdleGlow 3.2s ease-in-out infinite; }
+  @keyframes plankIdleGlow{
+    0%,100%{ box-shadow:0 0 24px rgba(157,92,255,0.25); }
+    50%{ box-shadow:0 0 42px rgba(255,46,196,0.4); }
+  }
+  .plank-timer-ring.plank-active::before{ animation:plankRingSpin 2.6s linear infinite; }
+  .plank-timer-ring.plank-active::after{ animation:plankActivePulse 1.1s ease-in-out infinite; }
+  @keyframes plankRingSpin{ to{ transform:rotate(360deg); } }
+  @keyframes plankActivePulse{
+    0%,100%{ box-shadow:0 0 22px rgba(157,92,255,0.4); }
+    50%{ box-shadow:0 0 50px rgba(0,229,255,0.55); }
+  }
+  .plank-timer-ring.plank-active{ animation:plankBreathe 4s ease-in-out infinite; }
+  @keyframes plankBreathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.035); } }
+  .plank-timer-inner{
+    position:absolute; inset:9px; border-radius:50%;
+    background:radial-gradient(circle at 50% 30%, var(--elevated), var(--void) 78%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  }
+  .plank-timer-display{ font-size:42px; font-weight:700; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+  .plank-timer-label{ font-size:11px; font-weight:700; letter-spacing:.18em; color:var(--text-dim); text-transform:uppercase; }
+  .plank-timer-ring.plank-active .plank-timer-label{ color:var(--cyan); }
+
+  .plank-result-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:0 20px;
+    margin-bottom:0; text-align:center; position:relative; overflow:hidden;
+    opacity:0; transform:translateY(8px) scale(.98); transition:opacity .35s ease, transform .35s ease, margin-bottom .35s ease;
+    max-height:0;
+  }
+  .plank-result-card.show{
+    opacity:1; transform:translateY(0) scale(1); max-height:260px; padding:20px; margin-bottom:22px;
+  }
+  .plank-result-card.pr{
+    border-color:rgba(255,46,196,0.5);
+    background:linear-gradient(160deg, rgba(0,229,255,0.12), rgba(157,92,255,0.10) 50%, rgba(255,46,196,0.14));
+  }
+  .plank-result-tag{ font-size:11px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--cyan); margin-bottom:6px; }
+  .plank-result-card.pr .plank-result-tag{ background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .plank-result-time{ font-size:32px; font-weight:700; margin-bottom:4px; }
+  .plank-result-sub{ font-size:13px; color:var(--text-dim); }
+
+  .plank-stats-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:26px; }
+  .plank-stat-card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; }
+  .plank-stat-value{
+    font-size:20px; font-weight:700; margin-bottom:2px;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .plank-stat-label{ font-size:10.5px; color:var(--text-dim); letter-spacing:.06em; text-transform:uppercase; }
+
+  .plank-section{ margin-bottom:28px; }
+  .plank-heatmap-card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; }
+  .plank-heatmap{ display:grid; grid-template-columns:repeat(13,1fr); gap:4px; }
+  .plank-heat-cell{
+    aspect-ratio:1; border-radius:4px; background:var(--elevated-hi);
+    transform:scale(.4); opacity:0; animation:plankCellIn .4s ease forwards;
+  }
+  @keyframes plankCellIn{ to{ transform:scale(1); opacity:1; } }
+  .plank-heatmap-empty{ font-size:12px; color:var(--text-faint); text-align:center; padding:14px 0; }
+
+  .plank-chart-card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 16px 12px; }
+  .plank-chart-empty{ font-size:12px; color:var(--text-faint); text-align:center; padding:20px 0; }
+  #plankChart{ display:block; width:100%; height:auto; overflow:visible; }
+  .plank-chart-bar{ transition:transform .7s cubic-bezier(.16,1,.3,1); transform-origin:bottom; transform:scaleY(0); }
+  .plank-chart-bar.grown{ transform:scaleY(1); }
+  .plank-chart-label{ font-size:9px; fill:var(--text-faint); font-family:'Inter',sans-serif; }
+
+  .plank-history-list{ display:flex; flex-direction:column; gap:8px; }
+  .plank-history-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px;
+    opacity:0; animation:plankRowIn .4s ease forwards;
+  }
+  @keyframes plankRowIn{ from{ opacity:0; transform:translateX(-6px); } to{ opacity:1; transform:translateX(0); } }
+  .plank-history-left{ display:flex; flex-direction:column; gap:2px; }
+  .plank-history-date{ font-size:13px; font-weight:600; }
+  .plank-history-time{ font-size:11px; color:var(--text-faint); }
+  .plank-history-dur{ font-weight:700; font-size:16px; }
+  .plank-history-dur.pr::after{ content:' \2605'; color:var(--magenta); }
+  .plank-history-empty{ font-size:13px; color:var(--text-faint); text-align:center; padding:20px 0; }
+
+  .plank-confetti-layer{ position:fixed; inset:0; pointer-events:none; z-index:50; overflow:hidden; }
+  .plank-confetti-piece{ position:absolute; width:8px; height:8px; top:38%; left:50%; border-radius:2px; opacity:1; }
+
+  /* ============ PR HANDOFF PROMPT (inside the shared overlay) ============ */
+  .pr-offer-sub{ color:var(--text-dim); font-size:13px; margin-bottom:20px; line-height:1.5; }
 </style>
 </head>
 <body>
 
-<div class="wrap">
+<div class="wrap" id="viewRoutine">
 
   <div class="topbar">
     <div class="brand">
@@ -563,8 +684,6 @@
         </div>
       </div>
     </div>
-    <div class="heatmap-direction mono">
-    </div>
     <div class="heatmap-row">
       <div class="heatmap-daylabels mono" id="heatmapDayLabels"></div>
       <div class="heatmap-wrap">
@@ -617,6 +736,80 @@
   <div class="foot-note mono">LOCAL STORAGE · YOUR DEVICE ONLY · NO ACCOUNT</div>
 </div>
 
+<div class="wrap" id="viewPlank" style="display:none;">
+  <div class="plank-header">
+    <div class="plank-wordmark disp">PLANK</div>
+    <div class="plank-streak-pill" id="plankStreakPill"><span class="plank-flame">&#128293;</span><span id="plankStreakCount" class="mono">0</span></div>
+  </div>
+
+  <div class="plank-timer-stage">
+    <button class="plank-timer-ring plank-idle" id="plankTimerBtn" aria-label="Start or stop plank timer">
+      <div class="plank-timer-inner">
+        <div class="plank-timer-display mono" id="plankTimerDisplay">0:00.0</div>
+        <div class="plank-timer-label" id="plankTimerLabel">Tap to start</div>
+      </div>
+    </button>
+  </div>
+
+  <div class="plank-result-card" id="plankResultCard">
+    <div class="plank-result-tag" id="plankResultTag">Logged</div>
+    <div class="plank-result-time mono" id="plankResultTime">0:00.0</div>
+    <div class="plank-result-sub" id="plankResultSub"></div>
+  </div>
+
+  <div class="plank-stats-grid">
+    <div class="plank-stat-card">
+      <div class="plank-stat-value mono" id="plankStatBest">0:00</div>
+      <div class="plank-stat-label">Best plank</div>
+    </div>
+    <div class="plank-stat-card">
+      <div class="plank-stat-value mono" id="plankStatToday">0:00</div>
+      <div class="plank-stat-label">Today's best</div>
+    </div>
+    <div class="plank-stat-card">
+      <div class="plank-stat-value mono" id="plankStatAvg">0:00</div>
+      <div class="plank-stat-label">7-day avg</div>
+    </div>
+    <div class="plank-stat-card">
+      <div class="plank-stat-value mono" id="plankStatTotal">0</div>
+      <div class="plank-stat-label">Total planks</div>
+    </div>
+  </div>
+
+  <div class="plank-section">
+    <div class="section-title disp">Consistency</div>
+    <div class="plank-heatmap-card">
+      <div class="plank-heatmap" id="plankHeatmap"></div>
+    </div>
+  </div>
+
+  <div class="plank-section">
+    <div class="section-title disp">Progression</div>
+    <div class="plank-chart-card">
+      <svg id="plankChart" viewBox="0 0 320 140"></svg>
+    </div>
+  </div>
+
+  <div class="plank-section">
+    <div class="section-title disp">Recent Sessions</div>
+    <div class="plank-history-list" id="plankHistoryList"></div>
+  </div>
+
+  <div class="foot-note mono">LOCAL STORAGE · YOUR DEVICE ONLY · NO ACCOUNT</div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabBtnRoutine" data-view="routine">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <span>Routine</span>
+  </button>
+  <button class="tab-btn" id="tabBtnPlank" data-view="plank">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 18l4-4 8 0 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Plank</span>
+  </button>
+</div>
+
+
 <!-- TIMER OVERLAY -->
 <div class="overlay" id="overlay">
   <div class="timer-panel" id="timerPanel"></div>
@@ -643,7 +836,7 @@ const NIGHT = [
 
 const DESK = [
   { id:'dA', letter:'A', name:'Full-Body Activation', xp:20,
-    phases:[{label:"Horse Stance",sec:30},{label:"RKC Plank",sec:15},{label:"Reverse Plank",sec:15}],
+    phases:[{label:"Horse Stance",sec:30},{label:"RKC Plank",sec:15,offerPR:true},{label:"Reverse Plank",sec:15}],
     exercises:[{name:"Horse Stance",sec:30},{name:"RKC Plank",sec:15},{name:"Reverse Plank",sec:15}] },
   { id:'dB', letter:'B', name:'Hip Flexor & Hamstring Stretch', xp:32,
     phases:[{label:"Couch (Left)",sec:30},{label:"Couch (Right)",sec:30},{label:"Elephant Walk",sec:60}],
@@ -1338,7 +1531,7 @@ function startInterval(){
   }, 100);
 }
 
-function nextPhase(){
+function advanceFromCurrentPhase(){
   const item = timerState.item;
   if(timerState.phaseIdx < item.phases.length - 1){
     playPhaseChime();
@@ -1346,11 +1539,92 @@ function nextPhase(){
     timerState.remaining = item.phases[timerState.phaseIdx].sec;
     timerState.lastTickSecond = null;
     renderTimerPanel();
+    startInterval();
   } else {
     clearInterval(timerState.intervalId);
     completeMovement();
   }
 }
+
+function nextPhase(){
+  const item = timerState.item;
+  const finishedPhase = item.phases[timerState.phaseIdx];
+  if(finishedPhase.offerPR){
+    clearInterval(timerState.intervalId);
+    showPROfferPrompt();
+    return;
+  }
+  advanceFromCurrentPhase();
+}
+
+/* ============ PLANK HANDOFF ============
+   When a phase flagged offerPR finishes, ask whether to keep holding for a
+   PR (handing off to the Plank tab, live) or continue the combo normally. */
+let pausedRoutineTimer = null;
+
+function showPROfferPrompt(){
+  panel.innerHTML = `
+    <div class="complete-panel">
+      <div class="complete-icon">&#9889;</div>
+      <div class="complete-title disp">RKC Plank Done</div>
+      <div class="pr-offer-sub">Keep holding for a plank PR, or continue to Reverse Plank?</div>
+      <div class="timer-controls" style="margin-top:6px;">
+        <button class="tc-btn" id="btnPrContinue">Continue</button>
+        <button class="tc-btn primary" id="btnPrPush">Push for a PR</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('btnPrContinue').onclick = ()=>{
+    advanceFromCurrentPhase();
+  };
+  document.getElementById('btnPrPush').onclick = ()=>{
+    pausedRoutineTimer = timerState;
+    timerState = null;
+    releaseWakeLock();
+    closeOverlay();
+    switchView('plank');
+    if(window.PlankApp) PlankApp.start();
+  };
+}
+
+function showResumeRoutinePrompt(){
+  panel.innerHTML = `
+    <div class="complete-panel">
+      <div class="complete-icon">&#10003;</div>
+      <div class="complete-title disp">Nice Hold</div>
+      <div class="pr-offer-sub">Continue to Reverse Plank and finish Full-Body Activation?</div>
+      <div class="timer-controls" style="margin-top:6px;">
+        <button class="tc-btn" id="btnResumeSkip">Skip</button>
+        <button class="tc-btn primary" id="btnResumeContinue">Continue</button>
+      </div>
+    </div>
+  `;
+  openOverlay();
+  document.getElementById('btnResumeSkip').onclick = ()=>{
+    pausedRoutineTimer = null;
+    closeOverlay();
+  };
+  document.getElementById('btnResumeContinue').onclick = ()=>{
+    timerState = pausedRoutineTimer;
+    pausedRoutineTimer = null;
+    switchView('routine');
+    requestWakeLock();
+    advanceFromCurrentPhase();
+    openOverlay();
+  };
+}
+
+/* ============ TAB SWITCHING ============ */
+function switchView(name){
+  const isRoutine = name === 'routine';
+  document.getElementById('viewRoutine').style.display = isRoutine ? '' : 'none';
+  document.getElementById('viewPlank').style.display = isRoutine ? 'none' : '';
+  document.getElementById('tabBtnRoutine').classList.toggle('active', isRoutine);
+  document.getElementById('tabBtnPlank').classList.toggle('active', !isRoutine);
+  if(!isRoutine && window.PlankApp) PlankApp.renderAll();
+}
+document.getElementById('tabBtnRoutine').onclick = ()=> switchView('routine');
+document.getElementById('tabBtnPlank').onclick = ()=> switchView('plank');
 
 function skipPhase(){
   nextPhase();
@@ -1504,12 +1778,345 @@ function showCompletion(item, kind, newlyUnlocked, bonuses){
   };
 }
 
+/* ============ PLANK TRACKER (ported, recolored to Anchor's palette) ============ */
+window.PlankApp = (function(){
+  const STORAGE_KEY = 'plank_sessions';
+  const PALETTE = ['#00e5ff', '#9d5cff', '#ff2ec4'];
+
+  let sessions = [];
+  let timerState = 'idle'; // idle | running
+  let startTime = null;
+  let rafId = null;
+
+  const el = {
+    btn: document.getElementById('plankTimerBtn'),
+    display: document.getElementById('plankTimerDisplay'),
+    label: document.getElementById('plankTimerLabel'),
+    streakCount: document.getElementById('plankStreakCount'),
+    streakPill: document.getElementById('plankStreakPill'),
+    resultCard: document.getElementById('plankResultCard'),
+    resultTag: document.getElementById('plankResultTag'),
+    resultTime: document.getElementById('plankResultTime'),
+    resultSub: document.getElementById('plankResultSub'),
+    statBest: document.getElementById('plankStatBest'),
+    statToday: document.getElementById('plankStatToday'),
+    statAvg: document.getElementById('plankStatAvg'),
+    statTotal: document.getElementById('plankStatTotal'),
+    heatmap: document.getElementById('plankHeatmap'),
+    chart: document.getElementById('plankChart'),
+    historyList: document.getElementById('plankHistoryList'),
+  };
+
+  function loadSessions(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) sessions = JSON.parse(raw);
+    }catch(e){ sessions = []; }
+  }
+  function saveSessions(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions)); }catch(e){}
+  }
+
+  function todayStr(){ return dateStr(new Date()); }
+  function dateStr(d){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function timeStr(d){
+    let h = d.getHours();
+    const m = String(d.getMinutes()).padStart(2,'0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if(h===0) h = 12;
+    return `${h}:${m} ${ampm}`;
+  }
+  function formatTime(seconds){
+    const m = Math.floor(seconds/60);
+    const s = (seconds % 60).toFixed(1);
+    return `${m}:${s.padStart(4,'0')}`;
+  }
+  function formatTimeShort(seconds){
+    const m = Math.floor(seconds/60);
+    const s = Math.round(seconds % 60);
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+  function vibrate(ms){ if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
+
+  function startTimer(){
+    timerState = 'running';
+    startTime = Date.now();
+    el.btn.classList.remove('plank-idle');
+    el.btn.classList.add('plank-active');
+    el.label.textContent = 'Tap when you drop';
+    el.resultCard.classList.remove('show');
+    vibrate(30);
+    tick();
+  }
+  function tick(){
+    const elapsed = (Date.now() - startTime) / 1000;
+    el.display.textContent = formatTime(elapsed);
+    rafId = requestAnimationFrame(tick);
+  }
+  function stopTimer(){
+    cancelAnimationFrame(rafId);
+    const elapsed = (Date.now() - startTime) / 1000;
+    timerState = 'idle';
+    el.btn.classList.remove('plank-active');
+    el.btn.classList.add('plank-idle');
+    el.label.textContent = 'Tap to start';
+    el.display.textContent = '0:00.0';
+    vibrate([20, 40, 20]);
+
+    const prevBest = sessions.length ? Math.max(...sessions.map(s => s.duration)) : 0;
+    const isPR = elapsed > prevBest;
+
+    const now = new Date();
+    sessions.push({ date: dateStr(now), time: timeStr(now), duration: Math.round(elapsed*10)/10 });
+    saveSessions();
+
+    showResult(elapsed, isPR, prevBest);
+    renderAll();
+    if(isPR && prevBest > 0) burstConfetti();
+    if(typeof PlankApp.onSessionLogged === 'function') PlankApp.onSessionLogged();
+  }
+
+  function showResult(elapsed, isPR, prevBest){
+    el.resultTime.textContent = formatTime(elapsed);
+    if(isPR){
+      el.resultTag.textContent = prevBest > 0 ? 'New best' : 'Saved';
+      el.resultSub.textContent = prevBest > 0 ? `+${formatTime(elapsed-prevBest)} over previous best` : '';
+      el.resultCard.classList.add('pr');
+    } else {
+      const diff = prevBest - elapsed;
+      el.resultTag.textContent = 'Logged';
+      el.resultSub.textContent = `${formatTime(diff)} off your best of ${formatTime(prevBest)}`;
+      el.resultCard.classList.remove('pr');
+    }
+    requestAnimationFrame(() => el.resultCard.classList.add('show'));
+  }
+
+  function burstConfetti(){
+    const layer = document.createElement('div');
+    layer.className = 'plank-confetti-layer';
+    document.body.appendChild(layer);
+    const count = 28;
+    for(let i=0;i<count;i++){
+      const p = document.createElement('div');
+      p.className = 'plank-confetti-piece';
+      p.style.background = PALETTE[i % PALETTE.length];
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 120 + Math.random() * 220;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist - 60;
+      const rot = Math.random() * 720 - 360;
+      p.animate([
+        { transform:'translate(-50%,-50%) translate(0,0) rotate(0deg)', opacity:1 },
+        { transform:`translate(-50%,-50%) translate(${dx}px, ${dy}px) rotate(${rot}deg)`, opacity:0 }
+      ], { duration:900+Math.random()*500, easing:'cubic-bezier(.16,1,.3,1)', fill:'forwards' });
+      layer.appendChild(p);
+    }
+    setTimeout(() => layer.remove(), 1600);
+  }
+
+  el.btn.addEventListener('click', () => {
+    if(timerState === 'idle') startTimer(); else stopTimer();
+  });
+
+  function computeStreak(){
+    if(!sessions.length) return 0;
+    const days = new Set(sessions.map(s => s.date));
+    let streak = 0;
+    let cursor = new Date();
+    const todayKey = dateStr(cursor);
+    if(!days.has(todayKey)) cursor.setDate(cursor.getDate() - 1);
+    while(days.has(dateStr(cursor))){ streak++; cursor.setDate(cursor.getDate() - 1); }
+    return streak;
+  }
+
+  function renderStats(){
+    const best = sessions.length ? Math.max(...sessions.map(s => s.duration)) : 0;
+    const today = todayStr();
+    const todaysSessions = sessions.filter(s => s.date === today);
+    const todayBest = todaysSessions.length ? Math.max(...todaysSessions.map(s => s.duration)) : 0;
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    const recentByDay = {};
+    sessions.forEach(s => {
+      const d = new Date(s.date + 'T00:00:00');
+      if(d >= new Date(dateStr(sevenDaysAgo)+'T00:00:00')) recentByDay[s.date] = Math.max(recentByDay[s.date] || 0, s.duration);
+    });
+    const recentVals = Object.values(recentByDay);
+    const avg = recentVals.length ? recentVals.reduce((a,b)=>a+b,0)/recentVals.length : 0;
+
+    el.statBest.textContent = formatTimeShort(best);
+    el.statToday.textContent = formatTimeShort(todayBest);
+    el.statAvg.textContent = formatTimeShort(avg);
+    el.statTotal.textContent = sessions.length;
+
+    const streak = computeStreak();
+    el.streakCount.textContent = streak;
+    el.streakPill.classList.toggle('lit', streak > 0);
+  }
+
+  function renderHeatmap(){
+    el.heatmap.innerHTML = '';
+    if(!sessions.length){ el.heatmap.innerHTML = '<div class="plank-heatmap-empty">No sessions yet.</div>'; return; }
+    const dayBest = {};
+    sessions.forEach(s => { dayBest[s.date] = Math.max(dayBest[s.date] || 0, s.duration); });
+
+    const sortedVals = Object.values(dayBest).sort((a,b) => a-b);
+    const rankRatio = (val) => {
+      if(sortedVals.length <= 1) return 1;
+      const idx = sortedVals.indexOf(val);
+      return idx / (sortedVals.length - 1);
+    };
+
+    const totalDays = 91;
+    const cells = [];
+    const today = new Date();
+    for(let i = totalDays - 1; i >= 0; i--){
+      const d = new Date();
+      d.setDate(today.getDate() - i);
+      const key = dateStr(d);
+      cells.push({ key, val: dayBest[key] || 0 });
+    }
+    cells.forEach((c, idx) => {
+      const cell = document.createElement('div');
+      cell.className = 'plank-heat-cell';
+      cell.style.animationDelay = (idx * 3) + 'ms';
+      if(c.val > 0){
+        cell.style.background = mixGradient(rankRatio(c.val));
+        cell.title = `${c.key}: ${formatTimeShort(c.val)}`;
+      } else {
+        cell.title = c.key;
+      }
+      el.heatmap.appendChild(cell);
+    });
+  }
+
+  function mixGradient(ratio){
+    const stops = [ [0,229,255], [157,92,255], [255,46,196] ]; // cyan -> purple -> magenta
+    let c;
+    if(ratio < 0.5) c = lerpColor(stops[0], stops[1], ratio/0.5);
+    else c = lerpColor(stops[1], stops[2], (ratio-0.5)/0.5);
+    const alpha = 0.25 + ratio*0.75;
+    return `rgba(${c[0]},${c[1]},${c[2]},${alpha})`;
+  }
+  function lerpColor(a,b,t){
+    return [ Math.round(a[0]+(b[0]-a[0])*t), Math.round(a[1]+(b[1]-a[1])*t), Math.round(a[2]+(b[2]-a[2])*t) ];
+  }
+
+  function renderChart(){
+    const svg = el.chart;
+    svg.innerHTML = '';
+    if(!sessions.length){
+      const card = svg.parentElement;
+      if(!card.querySelector('.plank-chart-empty')){
+        const div = document.createElement('div');
+        div.className = 'plank-chart-empty';
+        div.textContent = 'Not enough sessions yet.';
+        card.appendChild(div);
+      }
+      return;
+    }
+    const empty = svg.parentElement.querySelector('.plank-chart-empty');
+    if(empty) empty.remove();
+
+    const dayBest = {};
+    sessions.forEach(s => { dayBest[s.date] = Math.max(dayBest[s.date] || 0, s.duration); });
+    const days = Object.keys(dayBest).sort().slice(-10);
+    const vals = days.map(d => dayBest[d]);
+    const maxVal = Math.max(...vals, 1);
+
+    const W = 320, H = 140, padBottom = 20, padTop = 10;
+    const barW = (W / days.length) * 0.55;
+    const gap = (W / days.length);
+
+    const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    const grad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    grad.setAttribute('id','plankBarGrad');
+    grad.setAttribute('x1','0'); grad.setAttribute('y1','1');
+    grad.setAttribute('x2','0'); grad.setAttribute('y2','0');
+    grad.innerHTML = `
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="55%" stop-color="#9d5cff"/>
+      <stop offset="100%" stop-color="#ff2ec4"/>
+    `;
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+
+    days.forEach((d, i) => {
+      const v = vals[i];
+      const h = (v / maxVal) * (H - padTop - padBottom);
+      const x = i * gap + (gap - barW)/2;
+      const y = H - padBottom - h;
+
+      const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      rect.setAttribute('x', x); rect.setAttribute('y', y);
+      rect.setAttribute('width', barW); rect.setAttribute('height', h);
+      rect.setAttribute('rx', 4);
+      rect.setAttribute('fill', 'url(#plankBarGrad)');
+      rect.classList.add('plank-chart-bar');
+      rect.style.transformOrigin = `${x+barW/2}px ${H-padBottom}px`;
+      svg.appendChild(rect);
+      setTimeout(() => rect.classList.add('grown'), 30 + i*60);
+
+      const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+      const dObj = new Date(d + 'T00:00:00');
+      label.setAttribute('x', x+barW/2); label.setAttribute('y', H-4);
+      label.setAttribute('text-anchor','middle'); label.setAttribute('class','plank-chart-label');
+      label.textContent = `${dObj.getMonth()+1}/${dObj.getDate()}`;
+      svg.appendChild(label);
+    });
+  }
+
+  function renderHistory(){
+    el.historyList.innerHTML = '';
+    if(!sessions.length){ el.historyList.innerHTML = '<div class="plank-history-empty">No sessions yet.</div>'; return; }
+    const best = Math.max(...sessions.map(s => s.duration));
+    const recent = sessions.slice().reverse().slice(0, 12);
+    recent.forEach((s, idx) => {
+      const row = document.createElement('div');
+      row.className = 'plank-history-row';
+      row.style.animationDelay = (idx*30) + 'ms';
+      const dObj = new Date(s.date + 'T00:00:00');
+      const dateLabel = dObj.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+      row.innerHTML = `
+        <div class="plank-history-left">
+          <div class="plank-history-date">${dateLabel}</div>
+          <div class="plank-history-time">${s.time}</div>
+        </div>
+        <div class="plank-history-dur ${s.duration===best?'pr':''} mono">${formatTimeShort(s.duration)}</div>
+      `;
+      el.historyList.appendChild(row);
+    });
+  }
+
+  function renderAll(){
+    renderStats();
+    renderHeatmap();
+    renderChart();
+    renderHistory();
+  }
+
+  loadSessions();
+  renderAll();
+
+  return { start: startTimer, renderAll, onSessionLogged: null };
+})();
+
 /* ============ INIT ============ */
 today();
 recomputeStreak();
 checkBadges();
 checkBossRegen();
 document.getElementById('bossChip').onclick = showBossDetail;
+PlankApp.onSessionLogged = function(){
+  if(pausedRoutineTimer) showResumeRoutinePrompt();
+};
 render();
 </script>
 </body>
